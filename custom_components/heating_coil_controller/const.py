@@ -8,7 +8,7 @@
 from homeassistant.const import STATE_ON, STATE_OFF, STATE_UNKNOWN, STATE_UNAVAILABLE, STATE_OK, STATE_PROBLEM
 
 DOMAIN = "heating_coil_controller"
-VERSION = "0.01.01"
+VERSION = "0.01.02"
 MANUFACTURER = "Jozef Moravcik"
 MODEL = "Heating Coil"
 NAME = "Heating Coil Controller"
