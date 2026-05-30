@@ -1,5 +1,10 @@
 # Heating Coil Controller
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![GitHub Release](https://img.shields.io/github/v/release/jozef-moravcik-homeassistant/heating-coil-controller)](https://github.com/jozef-moravcik-homeassistant/template-integration/releases)
+
+# Heating Coil Controller
+
 A custom Home Assistant integration for intelligent power management of electric heating coils (water heaters, boilers, etc.). It maximises self-consumption of locally generated photovoltaic energy by continuously adjusting coil output power based on real-time PV production, battery storage state, and grid power flow. Instead of exporting surplus solar power to the grid at a low feed-in tariff, the system diverts it into heating, while at the same time protecting battery state-of-charge and respecting grid import/export limits.
 
 Key capabilities:
