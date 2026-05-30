@@ -1,0 +1,7 @@
+turn_off_all:
+  name: Turn OFF all
+  description: Turn OFF all heating coils
+
+turn_on_all:
+  name: Turn ON all
+  description: Turn ON all heating coils

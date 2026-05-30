@@ -1,0 +1,549 @@
+{
+  "config": {
+    "step": {
+      "device_type": {
+        "title": "Device type",
+        "description": "Select the type of device to add",
+        "data": {
+          "device_type": "Device type"
+        }
+      },
+      "control_parameters": {
+        "title": "Basic settings",
+        "description": "Entity settings",
+        "data": {
+          "include_device_name_in_entity": "Include device name in entity names",
+          "heating_coil_power": "Heating Coil Power [kW]",
+          "virtual_heating_coil": "Virtual heating coil (group)"
+        }
+      },
+      "modbus_connection_type": {
+        "title": "Modbus connection",
+        "description": "Select the type of Modbus connection",
+        "data": {
+          "modbus_connection_type": "Connection Type"
+        }
+      },
+      "modbus_existing_node": {
+        "title": "Existing Modbus Node",
+        "description": "Select an existing Modbus node defined in the system",
+        "data": {
+          "modbus_node_name": "Modbus Node"
+        }
+      },
+      "modbus_usb": {
+        "title": "Modbus – USB port (serial)",
+        "description": "Configure the Modbus serial (USB) connection",
+        "data": {
+          "port": "USB Port (port)",
+          "baudrate": "Baud Rate (baudrate)",
+          "bytesize": "Data Size (bytesize)",
+          "stopbits": "Stop Bits (stopbits)",
+          "parity": "Parity (parity)",
+          "delay": "Delay in seconds (delay)",
+          "message_wait_millisecond": "Message Wait in milliseconds (message_wait_millisecond)",
+          "timeout": "Timeout in seconds (timeout)"
+        }
+      },
+      "modbus_tcp": {
+        "title": "Modbus – TCP server",
+        "description": "Configure the Modbus TCP connection",
+        "data": {
+          "host": "IP Address / Hostname (host)",
+          "port": "Port (port)",
+          "message_wait_millisecond": "Message Wait in milliseconds (message_wait_millisecond)",
+          "timeout": "Timeout in seconds (timeout)"
+        }
+      },
+      "modbus_udp": {
+        "title": "Modbus – UDP server",
+        "description": "Configure the Modbus UDP connection",
+        "data": {
+          "host": "IP Address / Hostname (host)",
+          "port": "Port (port)",
+          "message_wait_millisecond": "Message Wait in milliseconds (message_wait_millisecond)",
+          "timeout": "Timeout in seconds (timeout)"
+        }
+      },
+      "modbus_device_settings": {
+        "title": "Modbus Device Settings",
+        "description": "Configure Modbus device parameters",
+        "data": {
+          "dac_output_port_id": "Port ID of analog output",
+          "modbus_node_entry_id": "Modbus Node device"
+        }
+      },
+      "output_power_curve": {
+        "title": "Adjusting the output power curve",
+        "description": "Set the output power curve parameters",
+        "data": {
+          "zero_power_point": "Zero power point [%]",
+          "maximum_power_point": "Maximum power point [%]",
+          "gamma": "Gamma [%]"
+        }
+      },
+      "solar_sensor_details": {
+        "title": "Setting parameters for control according to power from Solar Sensor",
+        "data": {
+          "solar_sensor_entity": "Select Solar Radiation Sensor",
+          "solar_sensor_unit": "Sensor unit",
+          "maximum_solar_radiation_value": "Maximum solar radiation value",
+          "solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]",
+          "solar_sensor_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "solar_sensor_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "solar_sensor_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "solar_sensor_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "pv_power_details": {
+        "title": "Setting parameters for control according to power from photovoltaic",
+        "data": {
+          "pv_power_entity": "Select Photovoltaic current power sensor",
+          "pv_power_unit": "Sensor unit",
+          "pv_power_max_power": "Maximum photovoltaic power",
+          "pv_power_ratio": "PV power ratio to output power [%]",
+          "pv_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "pv_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "pv_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "pv_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "power_grid_details": {
+        "title": "Setting parameters for control according to power to/from the grid (Electricity meter)",
+        "data": {
+          "power_grid_entity": "Select sensor of power flowing to/from the grid (Electricity meter)",
+          "power_grid_unit": "Sensor unit",
+          "power_grid_dead_zone_w": "Dead zone width [W]",
+          "power_grid_offset_w": "Offset [W]",
+          "power_grid_offset_export_limit_w": "Offset for Export limit [W]",
+          "power_grid_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "power_grid_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "power_grid_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "power_grid_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "battery_power_details": {
+        "title": "Setting parameters for control according to power to/from the battery",
+        "data": {
+          "battery_power_entity": "Select sensor of the power flowing to/from the battery",
+          "battery_power_unit": "Sensor unit",
+          "battery_power_dead_zone_w": "Dead zone width [W]",
+          "battery_power_offset_w": "Offset [W]",
+          "battery_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "battery_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "battery_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "battery_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "general_basic_settings": {
+        "title": "Basic settings",
+        "description": "General device settings",
+        "data": {
+          "include_device_name_in_entity": "Include device name in entity names",
+          "heating_coil_total_power": "Total power limit for all coils (overload protection) [kW]"
+        }
+      },
+      "modbus_node_basic_settings": {
+        "title": "Basic settings",
+        "description": "Modbus Node device settings",
+        "data": {
+          "include_device_name_in_entity": "Include device name in entity names",
+          "modbus_device_id": "Device ID",
+          "dac_type": "DAC Type"
+        }
+      },
+      "power_control_strategy": {
+        "title": "Heating coil power control strategy",
+        "data": {
+          "power_control_strategy": "Power control strategy",
+          "output_power_during_day_only": "Allow use of the heating coil only during the day",
+          "master_heating_coil_id": "Select MASTER Heating Coil",
+          "tracked_entities_interval": "Input entity state retrieval interval [sec.]"
+        }
+      },
+      "strategy_1_settings_part_1": {
+        "title": "STRATEGY 1 – part 1",
+        "data": {
+          "strategy_1_grid_export_status_entity": "Grid Export Status Entity",
+          "strategy_1_power_grid_entity": "Power Grid Entity",
+          "strategy_1_power_grid_unit": "Power Grid Unit",
+          "strategy_1_power_grid_dead_zone_w": "Dead zone width [W]",
+          "strategy_1_power_grid_offset_w": "Offset [W]",
+          "strategy_1_power_grid_offset_export_limit_w": "Offset for Export limit [W]",
+          "strategy_1_entity_battery_charging_enablement_state": "Entity of Battery Charging Enablement State",
+          "strategy_1_entity_battery_state_of_charge": "Entity of Battery State of Charge (SOC)",
+          "strategy_1_battery_power_entity": "Battery Power Entity",
+          "strategy_1_battery_power_unit": "Battery Power Unit",
+          "strategy_1_battery_power_dead_zone_w": "Dead zone width [W]",
+          "strategy_1_battery_power_offset_w": "Offset [W]",
+          "strategy_1_solar_sensor_entity": "Select Solar Radiation Sensor",
+          "strategy_1_solar_sensor_unit": "Sensor unit",
+          "strategy_1_maximum_solar_radiation_value": "Maximum solar radiation value",
+          "strategy_1_solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]"
+        }
+      },
+      "strategy_1_settings_part_2": {
+        "title": "STRATEGY 1 – part 2",
+        "data": {
+          "strategy_1_ramp_up_fast_power_step": "Ramp Up Fast Power Step [%]",
+          "strategy_1_ramp_up_slow_power_step": "Ramp Up Slow Power Step [%]",
+          "strategy_1_ramp_down_fast_power_step": "Ramp Down Fast Power Step [%]",
+          "strategy_1_ramp_down_slow_power_step": "Ramp Down Slow Power Step [%]",
+          "strategy_1_power_grid_ramp_up_fast_threshold": "Grid Power change threshold for Fast Ramp Up [W]",
+          "strategy_1_power_grid_ramp_down_fast_threshold": "Grid Power change threshold for Fast Ramp Down [W]",
+          "strategy_1_battery_ramp_up_fast_threshold": "Battery power change threshold for Fast Ramp Up [W]",
+          "strategy_1_battery_ramp_down_fast_threshold": "Battery power change threshold for Fast Ramp Down [W]",
+          "strategy_1_solar_sensor_ramp_down_fast_threshold": "Solar sensor value decrease threshold for Fast Ramp Down [W]"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "unknown": "Unexpected error",
+      "no_modbus_nodes": "No Modbus nodes found in the system. Please define at least one Modbus hub first.",
+      "no_serial_ports": "No free serial ports found. All ports may already be in use.",
+      "zero_power_point_too_high": "Zero power point must be less than Maximum power point.",
+      "no_modbus_node_entries": "No Modbus Node devices found. Please create at least one Modbus Node device first."
+    },
+    "abort": {
+      "already_configured": "Device is already configured",
+      "general_already_configured": "General device is already configured. Only one General device is allowed."
+    }
+  },
+  "options": {
+    "step": {
+      "control_parameters": {
+        "title": "Basic settings",
+        "description": "Entity settings",
+        "data": {
+          "include_device_name_in_entity": "Include device name in entity names",
+          "heating_coil_power": "Heating Coil Power [kW]",
+          "virtual_heating_coil": "Virtual heating coil (group)"
+        }
+      },
+      "modbus_connection_type": {
+        "title": "Modbus connection",
+        "description": "Select the type of Modbus connection",
+        "data": {
+          "modbus_connection_type": "Connection Type"
+        }
+      },
+      "modbus_existing_node": {
+        "title": "Existing Modbus Node",
+        "description": "Select an existing Modbus node defined in the system",
+        "data": {
+          "modbus_node_name": "Modbus Node"
+        }
+      },
+      "modbus_usb": {
+        "title": "Modbus – USB port (serial)",
+        "description": "Configure the Modbus serial (USB) connection",
+        "data": {
+          "port": "USB Port (port)",
+          "baudrate": "Baud Rate (baudrate)",
+          "bytesize": "Data Size (bytesize)",
+          "stopbits": "Stop Bits (stopbits)",
+          "parity": "Parity (parity)",
+          "delay": "Delay in seconds (delay)",
+          "message_wait_millisecond": "Message Wait in milliseconds (message_wait_millisecond)",
+          "timeout": "Timeout in seconds (timeout)"
+        }
+      },
+      "modbus_tcp": {
+        "title": "Modbus – TCP server",
+        "description": "Configure the Modbus TCP connection",
+        "data": {
+          "host": "IP Address / Hostname (host)",
+          "port": "Port (port)",
+          "message_wait_millisecond": "Message Wait in milliseconds (message_wait_millisecond)",
+          "timeout": "Timeout in seconds (timeout)"
+        }
+      },
+      "modbus_udp": {
+        "title": "Modbus – UDP server",
+        "description": "Configure the Modbus UDP connection",
+        "data": {
+          "host": "IP Address / Hostname (host)",
+          "port": "Port (port)",
+          "message_wait_millisecond": "Message Wait in milliseconds (message_wait_millisecond)",
+          "timeout": "Timeout in seconds (timeout)"
+        }
+      },
+      "modbus_device_settings": {
+        "title": "Modbus Device Settings",
+        "description": "Configure Modbus device parameters",
+        "data": {
+          "dac_output_port_id": "Port ID of analog output",
+          "modbus_node_entry_id": "Modbus Node device"
+        }
+      },
+      "output_power_curve": {
+        "title": "Adjusting the output power curve",
+        "description": "Set the output power curve parameters",
+        "data": {
+          "zero_power_point": "Zero power point [%]",
+          "maximum_power_point": "Maximum power point [%]",
+          "gamma": "Gamma [%]"
+        }
+      },
+      "solar_sensor_details": {
+        "title": "Setting parameters for control according to power from Solar Sensor",
+        "data": {
+          "solar_sensor_entity": "Select Solar Radiation Sensor",
+          "solar_sensor_unit": "Sensor unit",
+          "maximum_solar_radiation_value": "Maximum solar radiation value",
+          "solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]",
+          "solar_sensor_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "solar_sensor_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "solar_sensor_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "solar_sensor_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "pv_power_details": {
+        "title": "Setting parameters for control according to power from photovoltaic",
+        "data": {
+          "pv_power_entity": "Select Photovoltaic current power sensor",
+          "pv_power_unit": "Sensor unit",
+          "pv_power_max_power": "Maximum photovoltaic power",
+          "pv_power_ratio": "PV power ratio to output power [%]",
+          "pv_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "pv_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "pv_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "pv_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "power_grid_details": {
+        "title": "Setting parameters for control according to power to/from the grid (Electricity meter)",
+        "data": {
+          "power_grid_entity": "Select sensor of Power flowing to/from the grid (Electricity meter)",
+          "power_grid_unit": "Sensor unit",
+          "power_grid_dead_zone_w": "Dead zone width [W]",
+          "power_grid_offset_w": "Offset [W]",
+          "power_grid_offset_export_limit_w": "Offset for Export limit [W]",
+          "power_grid_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "power_grid_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "power_grid_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "power_grid_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "battery_power_details": {
+        "title": "Setting parameters for control according to power to/from the battery",
+        "data": {
+          "battery_power_entity": "Select sensor of the power flowing to/from the battery",
+          "battery_power_unit": "Sensor unit",
+          "battery_power_dead_zone_w": "Dead zone width [W]",
+          "battery_power_offset_w": "Offset [W]",
+          "battery_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "battery_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
+          "battery_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "battery_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
+        }
+      },
+      "general_basic_settings": {
+        "title": "Basic settings",
+        "description": "General device settings",
+        "data": {
+          "include_device_name_in_entity": "Include device name in entity names",
+          "heating_coil_total_power": "Total power limit for all coils (overload protection) [kW]"
+        }
+      },
+      "modbus_node_basic_settings": {
+        "title": "Basic settings",
+        "description": "Modbus Node device settings",
+        "data": {
+          "include_device_name_in_entity": "Include device name in entity names",
+          "modbus_device_id": "Device ID",
+          "dac_type": "DAC Type"
+        }
+      },
+      "power_control_strategy": {
+        "title": "Heating coil power control strategy",
+        "data": {
+          "power_control_strategy": "Power control strategy",
+          "output_power_during_day_only": "Allow use of the heating coil only during the day",
+          "master_heating_coil_id": "Select MASTER Heating Coil",
+          "tracked_entities_interval": "Input entity state retrieval interval [sec.]"
+        }
+      },
+      "strategy_1_settings_part_1": {
+        "title": "STRATEGY 1 – part 1",
+        "data": {
+          "strategy_1_grid_export_status_entity": "Grid Export Status Entity",
+          "strategy_1_power_grid_entity": "Power Grid Entity",
+          "strategy_1_power_grid_unit": "Power Grid Unit",
+          "strategy_1_power_grid_dead_zone_w": "Dead zone width [W]",
+          "strategy_1_power_grid_offset_w": "Offset [W]",
+          "strategy_1_power_grid_offset_export_limit_w": "Offset for Export limit [W]",
+          "strategy_1_entity_battery_charging_enablement_state": "Entity of Battery Charging Enablement State",
+          "strategy_1_entity_battery_state_of_charge": "Entity of Battery State of Charge (SOC)",
+          "strategy_1_battery_power_entity": "Battery Power Entity",
+          "strategy_1_battery_power_unit": "Battery Power Unit",
+          "strategy_1_battery_power_dead_zone_w": "Dead zone width [W]",
+          "strategy_1_battery_power_offset_w": "Offset [W]",
+          "strategy_1_solar_sensor_entity": "Select Solar Radiation Sensor",
+          "strategy_1_solar_sensor_unit": "Sensor unit",
+          "strategy_1_maximum_solar_radiation_value": "Maximum solar radiation value",
+          "strategy_1_solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]"
+        }
+      },
+      "strategy_1_settings_part_2": {
+        "title": "STRATEGY 1 – part 2",
+        "data": {
+          "strategy_1_ramp_up_fast_power_step": "Ramp Up Fast Power Step [%]",
+          "strategy_1_ramp_up_slow_power_step": "Ramp Up Slow Power Step [%]",
+          "strategy_1_ramp_down_fast_power_step": "Ramp Down Fast Power Step [%]",
+          "strategy_1_ramp_down_slow_power_step": "Ramp Down Slow Power Step [%]",
+          "strategy_1_power_grid_ramp_up_fast_threshold": "Grid Power change threshold for Fast Ramp Up [W]",
+          "strategy_1_power_grid_ramp_down_fast_threshold": "Grid Power change threshold for Fast Ramp Down [W]",
+          "strategy_1_battery_ramp_up_fast_threshold": "Battery power change threshold for Fast Ramp Up [W]",
+          "strategy_1_battery_ramp_down_fast_threshold": "Battery power change threshold for Fast Ramp Down [W]",
+          "strategy_1_solar_sensor_ramp_down_fast_threshold": "Solar sensor value decrease threshold for Fast Ramp Down [W]"
+        }
+      }
+    },
+    "error": {
+      "no_modbus_nodes": "No Modbus nodes found in the system. Please define at least one Modbus hub first.",
+      "no_serial_ports": "No free serial ports found. All ports may already be in use.",
+      "zero_power_point_too_high": "Zero power point must be less than Maximum power point.",
+      "no_modbus_node_entries": "No Modbus Node devices found. Please create at least one Modbus Node device first."
+    },
+    "abort": {
+      "no_options_available": "No options available for this device type yet."
+    }
+  },
+  "services": {
+    "turn_off_all": {
+      "name": "Turn OFF all",
+      "description": "Turn OFF all heating coils"
+    },
+    "turn_on_all": {
+      "name": "Turn ON all",
+      "description": "Turn ON all heating coils"
+    }
+  },
+  "selector": {
+    "modbus_connection_type": {
+      "options": {
+        "existing_node": "Existing Modbus Node",
+        "usb": "USB Port",
+        "tcp": "TCP Server",
+        "udp": "UDP Server"
+      }
+    },
+    "modbus_baudrate": {
+      "options": {
+        "300": "300",
+        "600": "600",
+        "1200": "1200",
+        "2400": "2400",
+        "4800": "4800",
+        "9600": "9600",
+        "14400": "14400",
+        "19200": "19200",
+        "38400": "38400",
+        "56000": "56000",
+        "57600": "57600",
+        "115200": "115200",
+        "128000": "128000",
+        "230400": "230400",
+        "256000": "256000"
+      }
+    },
+    "modbus_bytesize": {
+      "options": {
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8"
+      }
+    },
+    "modbus_stopbits": {
+      "options": {
+        "1": "1",
+        "2": "2"
+      }
+    },
+    "modbus_parity": {
+      "options": {
+        "N": "None",
+        "E": "Even",
+        "O": "Odd",
+        "M": "Mark"
+      }
+    },
+    "dac_output_type": {
+      "options": {
+        "0-10V": "0–10 V",
+        "0-20mA": "0–20 mA",
+        "4-20mA": "4–20 mA"
+      }
+    },
+    "device_type": {
+      "options": {
+        "general": "General",
+        "modbus_node": "Modbus Node",
+        "heating_coil": "Heating Coil"
+      }
+    },
+    "dac_type": {
+      "options": {
+        "amvol08": "AMVOL08 (8 x 0-10V)",
+        "daci4_i420": "DACI4_I4-20 (4 x 4-20mA)"
+      }
+    },
+    "sensor_unit": {
+      "options": {
+        "W": "W",
+        "kW": "kW"
+      }
+    },
+    "power_control_strategy": {
+      "options": {
+        "0": "MANUAL CONTROL",
+        "1": "STRATEGY 1",
+        "2": "Control by Solar Power Sensor",
+        "3": "Control by Photovoltaic Power",
+        "4": "Control by Power Flow to/from Grid",
+        "5": "Control by Power Flow to/from Battery"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "total_power": {
+        "name": "Total Power"
+      },
+      "error_code": {
+        "name": "Error Code"
+      },
+      "output_power_percent": {
+        "name": "Output Power [%]"
+      },
+      "output_power_kw": {
+        "name": "Output Power [kW]"
+      }
+    },
+    "select": {},
+    "switch": {
+      "enable": {
+        "name": "ON/OFF"
+      },
+      "only_use_power_above_export_limit": {
+        "name": "Only use power above the export limit"
+      }
+    },
+    "number": {
+      "max_power": {
+        "name": "Max. Power"
+      }
+    },
+    "button": {
+      "off_all": {
+        "name": "Turn OFF all"
+      },
+      "on_all": {
+        "name": "Turn ON all"
+      }
+    }
+  }
+}
