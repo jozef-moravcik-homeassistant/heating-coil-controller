@@ -1,0 +1,14 @@
+{
+  "domain": "heating_coil_controller",
+  "name": "Heating Coil Controller",
+  "codeowners": ["@jozef-moravcik-homeassistant"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/jozef-moravcik-homeassistant/heating-coil-controller",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/jozef-moravcik-homeassistant/heating-coil-controller/issues",
+  "loggers": ["heating_coil_controller"],
+  "requirements": ["pyserial>=3.5"],
+  "version": "0.01.01"
+}
