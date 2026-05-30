@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/jozef-moravcik-homeassistant/heating-coil-controller/issues",
   "loggers": ["heating_coil_controller"],
   "requirements": ["pyserial>=3.5"],
-  "version": "0.01.01"
+  "version": "0.01.02"
 }
