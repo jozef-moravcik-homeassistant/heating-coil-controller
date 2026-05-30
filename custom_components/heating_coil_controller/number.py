@@ -98,6 +98,11 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
             configuration_url=DOCUMENTATION_URL,
         )
 
+    @property
+    def has_entity_name(self) -> bool:
+        """Bypass entity registry cache – always use current setting."""
+        return self._attr_has_entity_name
+
     def __init__(
         self,
         instance,
@@ -125,7 +130,6 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
         device_name_sanitized = sanitize_device_name(instance.settings.device_name)
         
         self._attr_unique_id = f"{entry_id}_{entity_id}"
-        self._attr_translation_key = entity_id
 
         # Získať preložený názov entity
         entity_display_name = name
@@ -135,9 +139,9 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
             if translated_name:
                 entity_display_name = translated_name
 
-        self._attr_has_entity_name = False
+        self._attr_has_entity_name = True
         if instance.settings.include_device_name_in_entity:
-            self._attr_name = f"{instance.settings.device_name} {entity_display_name}"
+            self._attr_name = f"- {entity_display_name}"
         else:
             self._attr_name = entity_display_name
         
@@ -187,6 +191,7 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
                 self._handle_feedback_update,
             )
         )
+
 
     @callback
     def _handle_feedback_update(self) -> None:

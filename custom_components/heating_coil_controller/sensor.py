@@ -135,6 +135,11 @@ class SensorEntityDefinition(SensorEntity):
             configuration_url=DOCUMENTATION_URL,
         )
 
+    @property
+    def has_entity_name(self) -> bool:
+        """Bypass entity registry cache – always use current setting."""
+        return self._attr_has_entity_name
+
     def __init__(
         self,
         instance,
@@ -164,7 +169,6 @@ class SensorEntityDefinition(SensorEntity):
         device_name_sanitized = sanitize_device_name(instance.settings.device_name)
         
         self._attr_unique_id = f"{entry_id}_{entity_id}"
-        self._attr_translation_key = entity_id
 
         # Získať preložený názov entity
         entity_display_name = name
@@ -174,11 +178,9 @@ class SensorEntityDefinition(SensorEntity):
             if translated_name:
                 entity_display_name = translated_name
 
-        self._attr_has_entity_name = False
+        self._attr_has_entity_name = True
         if instance.settings.include_device_name_in_entity:
-            # has_entity_name = True: HA automaticky pridá názov zariadenia, entite nastavíme "- Sensor 1"
-            # výsledok: "Heating Coil 1 - Sensor 1"
-            self._attr_name = f"{instance.settings.device_name} {entity_display_name}"
+            self._attr_name = f"- {entity_display_name}"
         else:
             self._attr_name = entity_display_name
         
@@ -219,6 +221,7 @@ class SensorEntityDefinition(SensorEntity):
                 self._handle_feedback_update,
             )
         )
+
 
     @callback
     def _handle_feedback_update(self) -> None:
@@ -274,7 +277,6 @@ class GeneralSensorEntity(SensorEntity):
         self._entity_id_suffix = entity_id_suffix
 
         self._attr_unique_id = f"{entry_id}_{entity_id_suffix}"
-        self._attr_translation_key = entity_id_suffix
 
         # Získať preložený názov entity
         entity_display_name = name

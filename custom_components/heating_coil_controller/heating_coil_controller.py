@@ -296,11 +296,29 @@ class Heating_Coil_Controller_Instance:
         # Get INTERNAL ENTITIES states (Internal Entities created by this integration, Entity IDs are generated from entity names, not unique_ids)
             try:
                 
-                self.enable = self.hass.states.is_state(self.SWITCH_ENTITY_ENABLE, STATE_ON)
-                self.settings.only_use_power_above_export_limit = self.hass.states.is_state(
-                    self.SWITCH_ENTITY_ONLY_USE_POWER_ABOVE_EXPORT_LIMIT, STATE_ON
+                entry_data = self.hass.data.get(DOMAIN, {}).get(self._entry_id, {})
+                switches = entry_data.get("switches", {})
+                numbers  = entry_data.get("numbers", {})
+
+                switch_enable = switches.get(ENTITY_ENABLE)
+                switch_export = switches.get(ENTITY_ONLY_USE_POWER_ABOVE_EXPORT_LIMIT)
+                number_max_power = numbers.get(ENTITY_MAX_POWER)
+
+                if switch_enable is None or number_max_power is None:
+                    LOGGER.warning(
+                        "Internal entities not yet ready (enable=%s, max_power=%s), skipping cycle",
+                        switch_enable, number_max_power,
+                    )
+                    return
+
+                self.enable = switch_enable.is_on
+                self.settings.only_use_power_above_export_limit = (
+                    switch_export.is_on if switch_export is not None else False
                 )
-                self.max_power = float(self.hass.states.get(self.NUMBER_ENTITY_MAX_POWER).state)
+                if number_max_power.native_value is None:
+                    LOGGER.debug("max_power entity value is None, skipping cycle")
+                    return
+                self.max_power = float(number_max_power.native_value)
                 
                 LOGGER.debug("Internal Entity States: self.enable=%s, self.max_power=%s",
                             self.enable, self.max_power)
@@ -828,8 +846,16 @@ class Heating_Coil_Controller_Instance:
         # Okamžitá aktualizácia výstupu – zjednodušený pipeline
         self._is_running = True
         try:
-            self.enable = self.hass.states.is_state(self.SWITCH_ENTITY_ENABLE, STATE_ON)
-            self.max_power = float(self.hass.states.get(self.NUMBER_ENTITY_MAX_POWER).state)
+            _entry_data  = self.hass.data.get(DOMAIN, {}).get(self._entry_id, {})
+            _switches    = _entry_data.get("switches", {})
+            _numbers     = _entry_data.get("numbers", {})
+            _sw_enable   = _switches.get(ENTITY_ENABLE)
+            _nb_max_power = _numbers.get(ENTITY_MAX_POWER)
+            if _sw_enable is None or _nb_max_power is None or _nb_max_power.native_value is None:
+                LOGGER.debug("Solar handler: internal entities not ready, skipping")
+                return
+            self.enable = _sw_enable.is_on
+            self.max_power = float(_nb_max_power.native_value)
 
             effective_max_power = min(new_output, self.max_power)
 
