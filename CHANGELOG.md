@@ -5,6 +5,16 @@
 
 Home Assistant integration for xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+## v0.01.03
+
+# New features
+- added a safe fuse against spiral overheating
+- added new switch for manual and automatic power control
+- added new strategy "STRATEGY 2" for power control based only on data from the electricity meter and solar sensor. This strategy is intended for systems without a battery, allowing the export of surpluses to the grid.
+
+# Fixes:
+- In manual mode, after changing the power, this change was reflected on the output with a delay, because even in manual mode, the output value was recalculated within the set time interval, which is intended for automatic power control. From this version, in manual mode, the power change is reflected on the output immediately.
+
 ## v0.01.02
 
 # Changes
