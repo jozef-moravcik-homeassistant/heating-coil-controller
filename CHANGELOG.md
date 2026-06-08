@@ -9,7 +9,7 @@ Home Assistant integration for xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # New features
 - added a safe fuse against spiral overheating
-- added new switch for manual and automatic power control
+- added new switch for automatic / manual power control
 - added new strategy "STRATEGY 2" for power control based only on data from the electricity meter and solar sensor. This strategy is intended for systems without a battery, allowing the export of surpluses to the grid.
 
 # Fixes:
