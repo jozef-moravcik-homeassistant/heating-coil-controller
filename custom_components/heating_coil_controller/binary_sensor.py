@@ -19,14 +19,49 @@ from homeassistant.helpers.entity import EntityCategory, DeviceInfo
 from .helpers import load_translations
 from .const import *
 
+_LOGGER = logging.getLogger(__name__)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up binary sensor entities."""
-    # Žiadne binary sensor entity pre žiadny typ zariadenia
-    return
+    device_type = entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_HEATING_COIL)
+
+    if device_type != DEVICE_TYPE_HEATING_COIL:
+        return
+
+    data = hass.data.get(DOMAIN, {}).get(entry.entry_id, {})
+
+    instance = data.get("instance")
+    if instance is None:
+        return
+
+    is_virtual = data.get(CONF_VIRTUAL_HEATING_COIL, False)
+    if is_virtual:
+        return
+
+    # Načítať preklady asynchrónne
+    translations = await load_translations(hass)
+
+    entities = [
+        BinarySensorEntityDefinition(
+            instance=instance,
+            entry_id=entry.entry_id,
+            entity_id=ENTITY_THERMAL_PROTECTION_ACTIVE,
+            name="Safety Fuse",
+            translations=translations,
+            icon_off="mdi:thermometer-check",
+            icon_on="mdi:thermometer-alert",
+            default_value=False,
+            enabled_by_default=True,
+            device_class=BinarySensorDeviceClass.PROBLEM,
+        )
+    ]
+    async_add_entities(entities)
+
 
 class BinarySensorEntityDefinition(BinarySensorEntity):
 
@@ -46,6 +81,11 @@ class BinarySensorEntityDefinition(BinarySensorEntity):
         """Bypass entity registry cache – always use current setting."""
         return self._attr_has_entity_name
 
+    @property
+    def icon(self) -> str:
+        """Vráti ikonu podľa aktuálneho stavu – červená pri aktívnej poistke."""
+        return self._icon_on if self._attr_is_on else self._icon_off
+
     def __init__(
         self,
         instance,
@@ -53,7 +93,8 @@ class BinarySensorEntityDefinition(BinarySensorEntity):
         entity_id: str,
         name: str,
         translations: dict = None,
-        icon: str = "mdi:checkbox-blank-circle",
+        icon_off: str = "mdi:checkbox-blank-circle-outline",
+        icon_on: str = "mdi:checkbox-blank-circle",
         default_value: bool = False,
         enabled_by_default: bool = True,
         device_class: BinarySensorDeviceClass | None = None,
@@ -63,11 +104,10 @@ class BinarySensorEntityDefinition(BinarySensorEntity):
         """Initialize the binary sensor."""
         self._instance = instance
         self._entry_id = entry_id
-        
-        # Sanitize device name for entity ID
+
         from .const import sanitize_device_name
         device_name_sanitized = sanitize_device_name(instance.settings.device_name)
-        
+
         self._attr_unique_id = f"{entry_id}_{entity_id}"
 
         # Získať preložený názov entity
@@ -83,14 +123,20 @@ class BinarySensorEntityDefinition(BinarySensorEntity):
             self._attr_name = f"- {entity_display_name}"
         else:
             self._attr_name = entity_display_name
-        
+
         self.entity_id = f"binary_sensor.{device_name_sanitized}_{entity_id}"
-        self._attr_icon = icon
+
+        self._icon_off = icon_off
+        self._icon_on = icon_on
         self._entity_id = entity_id
         self._attr_is_on = default_value
         self._attr_available = available
         self._attr_entity_registry_enabled_default = enabled_by_default
         self._attr_entity_registry_visible_default = enabled_by_default
+
+        # translation_key – HA 2024+ ho použije pre texty stavov (on/off) z translations/
+        # Meno entity je riadené cez _attr_name vyššie, translation_key ho neprepíše
+        self._attr_translation_key = entity_id
 
         if device_class is not None:
             self._attr_device_class = device_class
@@ -100,7 +146,12 @@ class BinarySensorEntityDefinition(BinarySensorEntity):
     async def async_added_to_hass(self) -> None:
         """Run when entity about to be added to hass."""
         await super().async_added_to_hass()
-        
+
+        # Synchronizovať počiatočný stav z instance
+        current = self._instance.sensor_states.get(self._entity_id)
+        if current is not None:
+            self._attr_is_on = bool(current)
+
         # Subscribe to updates
         self.async_on_remove(
             async_dispatcher_connect(
@@ -109,7 +160,6 @@ class BinarySensorEntityDefinition(BinarySensorEntity):
                 self._handle_feedback_update,
             )
         )
-
 
     @callback
     def _handle_feedback_update(self) -> None:

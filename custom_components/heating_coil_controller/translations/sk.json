@@ -195,6 +195,43 @@
           "strategy_1_battery_ramp_down_fast_threshold": "Prah zmeny výkonu batérie pre rýchle znižovanie [W]",
           "strategy_1_solar_sensor_ramp_down_fast_threshold": "Prah poklesu hodnoty slnečného senzora pre rýchle znižovanie [W]"
         }
+      },
+      "thermal_protection": {
+        "title": "Bezpečnostná poistka",
+        "description": "Nastavenie bezpečnostnej poistky proti prehriatiu špirály",
+        "data": {
+          "thermal_protection_sensor_entity": "Entita teplotného senzora",
+          "thermal_protection_max_temp": "Maximálna povolená teplota [°C]"
+        }
+      },
+      "strategy_2_settings_part_1": {
+        "title": "STRATÉGIA 2 – časť 1",
+        "description": "Riadenie výkonu podľa Grid a Solar senzora (bez batérie)",
+        "data": {
+          "strategy_2_grid_export_status_entity": "Entita stavu exportu do siete",
+          "strategy_2_power_grid_entity": "Entita výkonu siete",
+          "strategy_2_power_grid_unit": "Jednotka výkonu siete",
+          "strategy_2_power_grid_dead_zone_w": "Šírka mŕtvej zóny [W]",
+          "strategy_2_power_grid_offset_w": "Offset [W]",
+          "strategy_2_power_grid_offset_export_limit_w": "Offset pre Export limit [W]",
+          "strategy_2_solar_sensor_entity": "Výber senzora slnečného žiarenia",
+          "strategy_2_solar_sensor_unit": "Jednotka senzora",
+          "strategy_2_maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
+          "strategy_2_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia [%]"
+        }
+      },
+      "strategy_2_settings_part_2": {
+        "title": "STRATÉGIA 2 – časť 2",
+        "description": "Parametre rampy pre STRATÉGIU 2",
+        "data": {
+          "strategy_2_power_grid_ramp_up_fast_threshold": "Prah zmeny výkonu siete pre rýchle zvyšovanie [W]",
+          "strategy_2_power_grid_ramp_down_fast_threshold": "Prah zmeny výkonu siete pre rýchle znižovanie [W]",
+          "strategy_2_solar_sensor_ramp_down_fast_threshold": "Prah poklesu hodnoty slnečného senzora pre rýchle znižovanie [W]",
+          "strategy_2_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu [%]",
+          "strategy_2_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu [%]",
+          "strategy_2_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu [%]",
+          "strategy_2_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu [%]"
+        }
       }
     },
     "error": {
@@ -399,6 +436,43 @@
           "strategy_1_battery_ramp_down_fast_threshold": "Prah zmeny výkonu batérie pre rýchle znižovanie [W]",
           "strategy_1_solar_sensor_ramp_down_fast_threshold": "Prah poklesu hodnoty slnečného senzora pre rýchle znižovanie [W]"
         }
+      },
+      "thermal_protection": {
+        "title": "Bezpečnostná poistka",
+        "description": "Nastavenie bezpečnostnej poistky proti prehriatiu špirály",
+        "data": {
+          "thermal_protection_sensor_entity": "Entita teplotného senzora",
+          "thermal_protection_max_temp": "Maximálna povolená teplota [°C]"
+        }
+      },
+      "strategy_2_settings_part_1": {
+        "title": "STRATÉGIA 2 – časť 1",
+        "description": "Riadenie výkonu podľa Grid a Solar senzora (bez batérie)",
+        "data": {
+          "strategy_2_grid_export_status_entity": "Entita stavu exportu do siete",
+          "strategy_2_power_grid_entity": "Entita výkonu siete",
+          "strategy_2_power_grid_unit": "Jednotka výkonu siete",
+          "strategy_2_power_grid_dead_zone_w": "Šírka mŕtvej zóny [W]",
+          "strategy_2_power_grid_offset_w": "Offset [W]",
+          "strategy_2_power_grid_offset_export_limit_w": "Offset pre Export limit [W]",
+          "strategy_2_solar_sensor_entity": "Výber senzora slnečného žiarenia",
+          "strategy_2_solar_sensor_unit": "Jednotka senzora",
+          "strategy_2_maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
+          "strategy_2_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia [%]"
+        }
+      },
+      "strategy_2_settings_part_2": {
+        "title": "STRATÉGIA 2 – časť 2",
+        "description": "Parametre rampy pre STRATÉGIU 2",
+        "data": {
+          "strategy_2_power_grid_ramp_up_fast_threshold": "Prah zmeny výkonu siete pre rýchle zvyšovanie [W]",
+          "strategy_2_power_grid_ramp_down_fast_threshold": "Prah zmeny výkonu siete pre rýchle znižovanie [W]",
+          "strategy_2_solar_sensor_ramp_down_fast_threshold": "Prah poklesu hodnoty slnečného senzora pre rýchle znižovanie [W]",
+          "strategy_2_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu [%]",
+          "strategy_2_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu [%]",
+          "strategy_2_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu [%]",
+          "strategy_2_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu [%]"
+        }
       }
     },
     "error": {
@@ -504,7 +578,8 @@
         "2": "Ovládanie sensorom slnečného žiarenia",
         "3": "Ovládanie výkonom z fotovoltaiky",
         "4": "Ovládanie prietokom do/zo siete",
-        "5": "Ovládanie prietokom do/zo batérie"
+        "5": "Ovládanie prietokom do/zo batérie",
+        "s2": "STRATÉGIA 2"
       }
     }
   },
@@ -530,6 +605,9 @@
       },
       "only_use_power_above_export_limit": {
         "name": "Využiť len výkon nad limitom exportu"
+      },
+      "auto_power_control": {
+        "name": "Automatické riadenie výkonu"
       }
     },
     "number": {
@@ -543,6 +621,15 @@
       },
       "on_all": {
         "name": "Zapnúť všetko"
+      }
+    },
+    "binary_sensor": {
+      "thermal_protection_active": {
+        "name": "Bezpečnostná poistka",
+        "state": {
+          "on": "Prehriaty",
+          "off": "Normálny"
+        }
       }
     }
   }

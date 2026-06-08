@@ -8,7 +8,7 @@
 from homeassistant.const import STATE_ON, STATE_OFF, STATE_UNKNOWN, STATE_UNAVAILABLE, STATE_OK, STATE_PROBLEM
 
 DOMAIN = "heating_coil_controller"
-VERSION = "0.01.02"
+VERSION = "0.01.03"
 MANUFACTURER = "Jozef Moravcik"
 MODEL = "Heating Coil"
 NAME = "Heating Coil Controller"
@@ -96,6 +96,7 @@ CONF_POWER_CONTROL_STRATEGY = "power_control_strategy"
 
 POWER_CONTROL_STRATEGY_MANUAL           = "0"
 POWER_CONTROL_STRATEGY_1                = "1"
+POWER_CONTROL_STRATEGY_2                = "s2"
 POWER_CONTROL_STRATEGY_SOLAR_SENSOR     = "2"
 POWER_CONTROL_STRATEGY_PV_POWER         = "3"
 POWER_CONTROL_STRATEGY_POWER_GRID       = "4"
@@ -104,6 +105,7 @@ POWER_CONTROL_STRATEGY_BATTERY          = "5"
 POWER_CONTROL_STRATEGY_OPTIONS = [
     POWER_CONTROL_STRATEGY_MANUAL,
     POWER_CONTROL_STRATEGY_1,
+    POWER_CONTROL_STRATEGY_2,
     POWER_CONTROL_STRATEGY_SOLAR_SENSOR,
     POWER_CONTROL_STRATEGY_PV_POWER,
     POWER_CONTROL_STRATEGY_POWER_GRID,
@@ -146,6 +148,7 @@ ENTITY_OUTPUT_POWER_PERCENT = "output_power_percent"
 ENTITY_OUTPUT_POWER_KW = "output_power_kw"
 ENTITY_ENABLE = "enable"
 ENTITY_ONLY_USE_POWER_ABOVE_EXPORT_LIMIT = "only_use_power_above_export_limit"
+ENTITY_AUTO_POWER_CONTROL = "auto_power_control"
 ENTITY_MAX_POWER = "max_power"
 
 ##############################################################################################################################
@@ -437,6 +440,47 @@ DEFAULT_STRATEGY_1_BATTERY_RAMP_UP_FAST_THRESHOLD = 4000
 DEFAULT_STRATEGY_1_BATTERY_RAMP_DOWN_FAST_THRESHOLD = 4000
 DEFAULT_STRATEGY_1_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD = 300
 
+##############################################################################################################################
+# Strategy 2 – Grid + Solar (bez batérie) ####################################################################################
+##############################################################################################################################
+CONF_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY           = "strategy_2_grid_export_status_entity"
+CONF_STRATEGY_2_POWER_GRID_ENTITY                   = "strategy_2_power_grid_entity"
+CONF_STRATEGY_2_POWER_GRID_UNIT                     = "strategy_2_power_grid_unit"
+CONF_STRATEGY_2_POWER_GRID_DEAD_ZONE_W              = "strategy_2_power_grid_dead_zone_w"
+CONF_STRATEGY_2_POWER_GRID_OFFSET_W                 = "strategy_2_power_grid_offset_w"
+CONF_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W    = "strategy_2_power_grid_offset_export_limit_w"
+CONF_STRATEGY_2_SOLAR_SENSOR_ENTITY                 = "strategy_2_solar_sensor_entity"
+CONF_STRATEGY_2_SOLAR_SENSOR_UNIT                   = "strategy_2_solar_sensor_unit"
+CONF_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE       = "strategy_2_maximum_solar_radiation_value"
+CONF_STRATEGY_2_SOLAR_SENSOR_ATTENUATION            = "strategy_2_solar_sensor_attenuation"
+
+CONF_STRATEGY_2_RAMP_UP_FAST_POWER_STEP             = "strategy_2_ramp_up_fast_power_step"
+CONF_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP             = "strategy_2_ramp_up_slow_power_step"
+CONF_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP           = "strategy_2_ramp_down_fast_power_step"
+CONF_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP           = "strategy_2_ramp_down_slow_power_step"
+CONF_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD   = "strategy_2_power_grid_ramp_up_fast_threshold"
+CONF_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD = "strategy_2_power_grid_ramp_down_fast_threshold"
+CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD = "strategy_2_solar_sensor_ramp_down_fast_threshold"
+
+DEFAULT_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY            = ""
+DEFAULT_STRATEGY_2_POWER_GRID_ENTITY                    = ""
+DEFAULT_STRATEGY_2_POWER_GRID_UNIT                      = "kW"
+DEFAULT_STRATEGY_2_POWER_GRID_DEAD_ZONE_W               = 300
+DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_W                  = 100
+DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W     = 9000
+DEFAULT_STRATEGY_2_SOLAR_SENSOR_ENTITY                  = ""
+DEFAULT_STRATEGY_2_SOLAR_SENSOR_UNIT                    = "W"
+DEFAULT_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE        = 1500
+DEFAULT_STRATEGY_2_SOLAR_SENSOR_ATTENUATION             = 100
+
+DEFAULT_STRATEGY_2_RAMP_UP_FAST_POWER_STEP              = 1
+DEFAULT_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP              = 1
+DEFAULT_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP            = 25
+DEFAULT_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP            = 1
+DEFAULT_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD    = 4000
+DEFAULT_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD  = 4000
+DEFAULT_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD = 300
+
 
 # Master heating coil
 CONF_MASTER_HEATING_COIL_ID = "master_heating_coil_id"
@@ -447,6 +491,24 @@ CONF_TRACKED_ENTITIES_INTERVAL = "tracked_entities_interval"
 DEFAULT_TRACKED_ENTITIES_INTERVAL = 5
 MIN_TRACKED_ENTITIES_INTERVAL = 1
 MAX_TRACKED_ENTITIES_INTERVAL = 30
+
+##############################################################################################################################
+# Thermal protection (safety fuse) ###########################################################################################
+##############################################################################################################################
+CONF_THERMAL_PROTECTION_SENSOR_ENTITY  = "thermal_protection_sensor_entity"
+CONF_THERMAL_PROTECTION_MAX_TEMP       = "thermal_protection_max_temp"
+
+THERMAL_PROTECTION_NO_SENSOR           = "---"   # Sentinel value – no sensor selected
+THERMAL_PROTECTION_HYSTERESIS          = 2.0     # Fixed hysteresis [°C]
+
+DEFAULT_THERMAL_PROTECTION_SENSOR_ENTITY = THERMAL_PROTECTION_NO_SENSOR
+DEFAULT_THERMAL_PROTECTION_MAX_TEMP      = 75
+
+MIN_THERMAL_PROTECTION_MAX_TEMP = 30
+MAX_THERMAL_PROTECTION_MAX_TEMP = 90
+
+# Binary sensor entity name for thermal protection state
+ENTITY_THERMAL_PROTECTION_ACTIVE = "thermal_protection_active"
 
 ##############################################################################################################################
 # Default values of static parameters ########################################################################################

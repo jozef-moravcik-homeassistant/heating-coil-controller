@@ -52,6 +52,19 @@ async def async_setup_entry(
         SwitchEntityDefinition(
             instance,
             entry_id = entry.entry_id,
+            entity_id = ENTITY_AUTO_POWER_CONTROL,
+            name = "Automatic power control",
+            translations = translations,
+            icon = "mdi:auto-mode",
+            icon_off = "mdi:car-cruise-control",
+            initial_state = True,
+            enabled_by_default = True,
+            restore_state = True,
+            device_class = SwitchDeviceClass.SWITCH,
+        ),
+        SwitchEntityDefinition(
+            instance,
+            entry_id = entry.entry_id,
             entity_id = ENTITY_ONLY_USE_POWER_ABOVE_EXPORT_LIMIT,
             name = "Only use power above the export limit",
             translations = translations,
@@ -185,6 +198,8 @@ class SwitchEntityDefinition(SwitchEntity, RestoreEntity):
         # Synchronizácia ON/OFF stavu v rámci master skupiny
         if self._entity_id == ENTITY_ENABLE:
             await self._sync_group_enable(True)
+        if self._entity_id == ENTITY_AUTO_POWER_CONTROL:
+            await self._sync_group_auto_power_control(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the switch off."""
@@ -194,6 +209,8 @@ class SwitchEntityDefinition(SwitchEntity, RestoreEntity):
         # Synchronizácia ON/OFF stavu v rámci master skupiny
         if self._entity_id == ENTITY_ENABLE:
             await self._sync_group_enable(False)
+        if self._entity_id == ENTITY_AUTO_POWER_CONTROL:
+            await self._sync_group_auto_power_control(False)
 
     async def _sync_group_enable(self, turn_on: bool) -> None:
         """Synchronizuje ON/OFF stav z Master na Slave špirálky (jednosmerná synchronizácia).
@@ -237,6 +254,49 @@ class SwitchEntityDefinition(SwitchEntity, RestoreEntity):
                     else:
                         await peer_switch.async_turn_off()
                     LOGGER.debug("Group sync (Master→Slave): %s → %s", self.entity_id, peer_switch.entity_id)
+                finally:
+                    peer_switch._group_syncing = False
+        finally:
+            self._group_syncing = False
+
+    async def _sync_group_auto_power_control(self, turn_on: bool) -> None:
+        """Synchronizuje auto_power_control stav z Master na Slave špirálky.
+
+        Volá sa po zmene auto_power_control switchu. Synchronizácia prebieha len
+        z Master na Slave. Ak je tento switch Slave, synchronizácia sa nekoná.
+        Chráni sa proti nekonečnej slučke cez _group_syncing flag.
+        """
+        if self._group_syncing:
+            return
+        self._group_syncing = True
+        try:
+            from .helpers import get_slave_entry_ids, get_master_entry_id
+
+            my_master = get_master_entry_id(self.hass, self._entry_id)
+            if my_master is not None:
+                return
+
+            slaves = get_slave_entry_ids(self.hass, self._entry_id)
+            if not slaves:
+                return
+
+            domain_data = self.hass.data.get(DOMAIN, {})
+
+            for peer_eid in slaves:
+                peer_data = domain_data.get(peer_eid, {})
+                if not isinstance(peer_data, dict):
+                    continue
+                peer_switches = peer_data.get("switches", {})
+                peer_switch = peer_switches.get(ENTITY_AUTO_POWER_CONTROL)
+                if peer_switch is None:
+                    continue
+                peer_switch._group_syncing = True
+                try:
+                    if turn_on:
+                        await peer_switch.async_turn_on()
+                    else:
+                        await peer_switch.async_turn_off()
+                    LOGGER.debug("Group sync auto_power_control (Master→Slave): %s → %s", self.entity_id, peer_switch.entity_id)
                 finally:
                     peer_switch._group_syncing = False
         finally:

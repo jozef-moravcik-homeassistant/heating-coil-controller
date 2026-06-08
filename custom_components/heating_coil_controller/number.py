@@ -39,6 +39,7 @@ from .const import (
     DEFAULT_DAC_OUTPUT_PORT_ID,
     CONF_MODBUS_DEVICE_ID,
     DEFAULT_MODBUS_DEVICE_ID,
+    POWER_CONTROL_STRATEGY_MANUAL,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -206,6 +207,8 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
         # Synchronizácia max_power v rámci master skupiny
         if self._entity_id == ENTITY_MAX_POWER:
             await self._sync_group_max_power(value)
+            # V manuálnom móde aplikovať zmenu okamžite bez čakania na interval
+            await self._trigger_manual_mode_update()
 
     async def _sync_group_max_power(self, value: float) -> None:
         """Synchronizuje max_power z Master na Slave špirálky (jednosmerná synchronizácia).
@@ -250,3 +253,28 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
                     peer_number._group_syncing = False
         finally:
             self._group_syncing = False
+    async def _trigger_manual_mode_update(self) -> None:
+        """Okamžite spustí my_controller ak je aktívna manuálna stratégia.
+
+        Volá sa po zmene max_power slidera. Týka sa len inštancií kde je
+        stratégia MANUAL – ostatné stratégie si riadia vlastný rytmus
+        a táto metóda ich neovplyvní.
+        """
+        try:
+            domain_data = self.hass.data.get(DOMAIN, {})
+            entry_data = domain_data.get(self._entry_id, {})
+            instance = entry_data.get("instance")
+            if instance is None:
+                return
+
+            strategy = instance.settings.power_control_strategy
+            if strategy != POWER_CONTROL_STRATEGY_MANUAL:
+                return
+
+            LOGGER.debug(
+                "Manual mode: triggering immediate my_controller after max_power change (%.1f%%)",
+                self._attr_native_value,
+            )
+            await instance.my_controller()
+        except Exception as e:
+            LOGGER.error("Error in _trigger_manual_mode_update: %s", e)

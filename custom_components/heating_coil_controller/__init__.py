@@ -18,7 +18,7 @@ from datetime import timedelta
 from .const import *
 
 LOGGER = logging.getLogger(__name__)
-PLATFORMS: list[Platform] = [Platform.SWITCH, Platform.SENSOR, Platform.NUMBER]
+PLATFORMS: list[Platform] = [Platform.SWITCH, Platform.SENSOR, Platform.NUMBER, Platform.BINARY_SENSOR]
 GENERAL_PLATFORMS: list[Platform] = [Platform.BUTTON, Platform.SENSOR]
 MODBUS_NODE_PLATFORMS: list[Platform] = [Platform.SENSOR]
 
@@ -297,6 +297,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         strategy_1_maximum_solar_radiation_value = strategy_1_maximum_solar_radiation_value_raw
     strategy_1_solar_sensor_attenuation  = int(_get(CONF_STRATEGY_1_SOLAR_SENSOR_ATTENUATION, DEFAULT_STRATEGY_1_SOLAR_SENSOR_ATTENUATION))
 
+    # Strategy 2 – Grid + Solar (bez batérie)
+    strategy_2_grid_export_status_entity           = _get(CONF_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY, DEFAULT_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY)
+    strategy_2_power_grid_entity                   = _get(CONF_STRATEGY_2_POWER_GRID_ENTITY, DEFAULT_STRATEGY_2_POWER_GRID_ENTITY)
+    strategy_2_power_grid_unit                     = _get(CONF_STRATEGY_2_POWER_GRID_UNIT, DEFAULT_STRATEGY_2_POWER_GRID_UNIT)
+    strategy_2_power_grid_dead_zone_w              = int(_get(CONF_STRATEGY_2_POWER_GRID_DEAD_ZONE_W, DEFAULT_STRATEGY_2_POWER_GRID_DEAD_ZONE_W))
+    strategy_2_power_grid_offset_w                 = int(_get(CONF_STRATEGY_2_POWER_GRID_OFFSET_W, DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_W))
+    strategy_2_power_grid_offset_export_limit_w    = int(_get(CONF_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W, DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W))
+    strategy_2_solar_sensor_entity                 = _get(CONF_STRATEGY_2_SOLAR_SENSOR_ENTITY, DEFAULT_STRATEGY_2_SOLAR_SENSOR_ENTITY)
+    strategy_2_solar_sensor_unit                   = _get(CONF_STRATEGY_2_SOLAR_SENSOR_UNIT, DEFAULT_STRATEGY_2_SOLAR_SENSOR_UNIT)
+    strategy_2_maximum_solar_radiation_value       = float(_get(CONF_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE, DEFAULT_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE))
+    strategy_2_solar_sensor_attenuation            = int(_get(CONF_STRATEGY_2_SOLAR_SENSOR_ATTENUATION, DEFAULT_STRATEGY_2_SOLAR_SENSOR_ATTENUATION))
+    strategy_2_ramp_up_fast_power_step             = int(_get(CONF_STRATEGY_2_RAMP_UP_FAST_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_UP_FAST_POWER_STEP))
+    strategy_2_ramp_up_slow_power_step             = int(_get(CONF_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP))
+    strategy_2_ramp_down_fast_power_step           = int(_get(CONF_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP))
+    strategy_2_ramp_down_slow_power_step           = int(_get(CONF_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP))
+    strategy_2_power_grid_ramp_up_fast_threshold   = int(_get(CONF_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD, DEFAULT_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD))
+    strategy_2_power_grid_ramp_down_fast_threshold = int(_get(CONF_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD, DEFAULT_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD))
+    strategy_2_solar_sensor_ramp_down_fast_threshold = int(_get(CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD, DEFAULT_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD))
+
+    # Thermal protection (safety fuse) – len pre fyzické špirály
+    thermal_protection_sensor_entity = _get(CONF_THERMAL_PROTECTION_SENSOR_ENTITY, DEFAULT_THERMAL_PROTECTION_SENSOR_ENTITY)
+    thermal_protection_max_temp      = int(_get(CONF_THERMAL_PROTECTION_MAX_TEMP, DEFAULT_THERMAL_PROTECTION_MAX_TEMP))
+
     tracked_entities_interval                          = int(_get(CONF_TRACKED_ENTITIES_INTERVAL, DEFAULT_TRACKED_ENTITIES_INTERVAL))
 
 # ******************************************************************************************
@@ -401,7 +424,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     instance.settings.strategy_1_solar_sensor_unit = strategy_1_solar_sensor_unit
     instance.settings.strategy_1_maximum_solar_radiation_value = strategy_1_maximum_solar_radiation_value
     instance.settings.strategy_1_solar_sensor_attenuation = strategy_1_solar_sensor_attenuation
+
+    # Strategy 2
+    instance.settings.strategy_2_grid_export_status_entity           = strategy_2_grid_export_status_entity
+    instance.settings.strategy_2_power_grid_entity                   = strategy_2_power_grid_entity
+    instance.settings.strategy_2_power_grid_unit                     = strategy_2_power_grid_unit
+    instance.settings.strategy_2_power_grid_dead_zone_w              = strategy_2_power_grid_dead_zone_w
+    instance.settings.strategy_2_power_grid_offset_w                 = strategy_2_power_grid_offset_w
+    instance.settings.strategy_2_power_grid_offset_export_limit_w    = strategy_2_power_grid_offset_export_limit_w
+    instance.settings.strategy_2_solar_sensor_entity                 = strategy_2_solar_sensor_entity
+    instance.settings.strategy_2_solar_sensor_unit                   = strategy_2_solar_sensor_unit
+    instance.settings.strategy_2_maximum_solar_radiation_value       = strategy_2_maximum_solar_radiation_value
+    instance.settings.strategy_2_solar_sensor_attenuation            = strategy_2_solar_sensor_attenuation
+    instance.settings.strategy_2_ramp_up_fast_power_step             = strategy_2_ramp_up_fast_power_step
+    instance.settings.strategy_2_ramp_up_slow_power_step             = strategy_2_ramp_up_slow_power_step
+    instance.settings.strategy_2_ramp_down_fast_power_step           = strategy_2_ramp_down_fast_power_step
+    instance.settings.strategy_2_ramp_down_slow_power_step           = strategy_2_ramp_down_slow_power_step
+    instance.settings.strategy_2_power_grid_ramp_up_fast_threshold   = strategy_2_power_grid_ramp_up_fast_threshold
+    instance.settings.strategy_2_power_grid_ramp_down_fast_threshold = strategy_2_power_grid_ramp_down_fast_threshold
+    instance.settings.strategy_2_solar_sensor_ramp_down_fast_threshold = strategy_2_solar_sensor_ramp_down_fast_threshold
+
     instance.settings.tracked_entities_interval = tracked_entities_interval
+
+    # Thermal protection (safety fuse)
+    instance.settings.thermal_protection_sensor_entity = thermal_protection_sensor_entity
+    instance.settings.thermal_protection_max_temp      = thermal_protection_max_temp
 
     # Nastavenie entity IDs po nastavení device_name
     instance.setup_entity_ids()
@@ -512,6 +559,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             CONF_STRATEGY_1_MAXIMUM_SOLAR_RADIATION_VALUE: strategy_1_maximum_solar_radiation_value,
             CONF_STRATEGY_1_SOLAR_SENSOR_ATTENUATION:     strategy_1_solar_sensor_attenuation,
             CONF_TRACKED_ENTITIES_INTERVAL:                         tracked_entities_interval,
+            # Thermal protection
+            CONF_THERMAL_PROTECTION_SENSOR_ENTITY: thermal_protection_sensor_entity,
+            CONF_THERMAL_PROTECTION_MAX_TEMP:      thermal_protection_max_temp,
         }
 
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -552,6 +602,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             solar_tracked.append(solar_sensor_entity)
         if strategy_1_solar_sensor_entity:
             solar_tracked.append(strategy_1_solar_sensor_entity)
+        if strategy_2_solar_sensor_entity:
+            solar_tracked.append(strategy_2_solar_sensor_entity)
         solar_tracked = list(set(filter(None, solar_tracked)))
 
         if solar_tracked:
@@ -749,6 +801,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry."""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+    await hass.config_entries.async_reload(entry.entry_id)
     

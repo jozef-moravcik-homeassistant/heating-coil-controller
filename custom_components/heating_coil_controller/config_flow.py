@@ -750,7 +750,7 @@ class HeatingCoilControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "zero_power_point_too_high"
             else:
                 self._data.update(user_input)
-                return await self.async_step_power_control_strategy()
+                return await self.async_step_thermal_protection()
 
         data_schema = vol.Schema(
             {
@@ -776,6 +776,60 @@ class HeatingCoilControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     # ------------------------------------------------------------------
+    # Krok 4b – Thermal protection (safety fuse) – ConfigFlow
+    # ------------------------------------------------------------------
+    async def async_step_thermal_protection(self, user_input=None):
+        """Handle Thermal Protection step (ConfigFlow)."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_power_control_strategy()
+
+        # Zostaviť zoznam teplotných senzorov s friendly_name ako label
+        temp_sensor_options_dicts = [{"value": THERMAL_PROTECTION_NO_SENSOR, "label": "- - -"}]
+        for state in sorted(
+            self.hass.states.async_all("sensor"),
+            key=lambda s: (s.attributes.get("friendly_name") or s.entity_id).lower(),
+        ):
+            if (
+                state.attributes.get("device_class") == "temperature"
+                or state.attributes.get("unit_of_measurement") in ("°C", "°F", "K")
+            ):
+                friendly = state.attributes.get("friendly_name") or state.entity_id
+                temp_sensor_options_dicts.append({"value": state.entity_id, "label": f"{friendly} ({state.entity_id})"})
+
+        current_sensor = self._data.get(CONF_THERMAL_PROTECTION_SENSOR_ENTITY, DEFAULT_THERMAL_PROTECTION_SENSOR_ENTITY)
+        known_values = {o["value"] for o in temp_sensor_options_dicts}
+        if current_sensor and current_sensor not in known_values:
+            temp_sensor_options_dicts.insert(1, {"value": current_sensor, "label": current_sensor})
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_THERMAL_PROTECTION_SENSOR_ENTITY,
+                    default=current_sensor,
+                ): SelectSelector(SelectSelectorConfig(
+                    options=temp_sensor_options_dicts,
+                    mode=SelectSelectorMode.DROPDOWN,
+                )),
+                vol.Required(
+                    CONF_THERMAL_PROTECTION_MAX_TEMP,
+                    default=self._data.get(CONF_THERMAL_PROTECTION_MAX_TEMP, DEFAULT_THERMAL_PROTECTION_MAX_TEMP),
+                ): NumberSelector(NumberSelectorConfig(
+                    min=MIN_THERMAL_PROTECTION_MAX_TEMP,
+                    max=MAX_THERMAL_PROTECTION_MAX_TEMP,
+                    step=1,
+                    unit_of_measurement="°C",
+                    mode=NumberSelectorMode.BOX,
+                )),
+            }
+        )
+
+        return self.async_show_form(
+            step_id="thermal_protection",
+            data_schema=data_schema,
+        )
+
+    # ------------------------------------------------------------------
     # Krok 4a – Power Control Strategy
     # ------------------------------------------------------------------
     async def async_step_power_control_strategy(self, user_input=None):
@@ -798,6 +852,8 @@ class HeatingCoilControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_battery_power_details()
             elif strategy == POWER_CONTROL_STRATEGY_1:
                 return await self.async_step_strategy_1_settings_part_1()
+            elif strategy == POWER_CONTROL_STRATEGY_2:
+                return await self.async_step_strategy_2_settings_part_1()
             else:
                 return await self.async_step_advanced_parameters()
 
@@ -1181,6 +1237,110 @@ class HeatingCoilControllerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
         return self.async_show_form(step_id="strategy_1_settings_part_2", data_schema=data_schema)
+
+
+    # ------------------------------------------------------------------
+    # Krok 5b – Strategy 2 Settings part 1 (ConfigFlow)
+    # ------------------------------------------------------------------
+    async def async_step_strategy_2_settings_part_1(self, user_input=None):
+        """Handle Strategy 2 Parameters part 1 step (ConfigFlow)."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_strategy_2_settings_part_2()
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY,
+                    default=self._data.get(CONF_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY, DEFAULT_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY),
+                ): EntitySelector(EntitySelectorConfig(domain="sensor")),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_ENTITY,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_ENTITY, DEFAULT_STRATEGY_2_POWER_GRID_ENTITY),
+                ): EntitySelector(EntitySelectorConfig(domain="sensor")),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_UNIT,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_UNIT, DEFAULT_STRATEGY_2_POWER_GRID_UNIT),
+                ): SelectSelector(SelectSelectorConfig(
+                    options=SENSOR_UNIT_OPTIONS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key="sensor_unit",
+                )),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_DEAD_ZONE_W,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_DEAD_ZONE_W, DEFAULT_STRATEGY_2_POWER_GRID_DEAD_ZONE_W),
+                ): NumberSelector(NumberSelectorConfig(min=-5000, max=5000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_OFFSET_W,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_OFFSET_W, DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_W),
+                ): NumberSelector(NumberSelectorConfig(min=-10000, max=10000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W, DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W),
+                ): NumberSelector(NumberSelectorConfig(min=-100000, max=100000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_ENTITY,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_ENTITY, DEFAULT_STRATEGY_2_SOLAR_SENSOR_ENTITY),
+                ): EntitySelector(EntitySelectorConfig(domain="sensor")),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_UNIT,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_UNIT, DEFAULT_STRATEGY_2_SOLAR_SENSOR_UNIT),
+                ): SelectSelector(SelectSelectorConfig(
+                    options=SENSOR_UNIT_OPTIONS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key="sensor_unit",
+                )),
+                vol.Required(
+                    CONF_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE,
+                    default=self._data.get(CONF_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE, DEFAULT_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=2000, step=0.01, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_ATTENUATION,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_ATTENUATION, DEFAULT_STRATEGY_2_SOLAR_SENSOR_ATTENUATION),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+            }
+        )
+        return self.async_show_form(step_id="strategy_2_settings_part_1", data_schema=data_schema)
+
+    async def async_step_strategy_2_settings_part_2(self, user_input=None):
+        """Handle Strategy 2 Parameters part 2 step (ConfigFlow)."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_advanced_parameters()
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD, DEFAULT_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=50000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD, DEFAULT_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=50000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD, DEFAULT_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=50000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_UP_FAST_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_UP_FAST_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_UP_FAST_POWER_STEP),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+            }
+        )
+        return self.async_show_form(step_id="strategy_2_settings_part_2", data_schema=data_schema)
 
 
     # ------------------------------------------------------------------
@@ -1804,7 +1964,7 @@ class HeatingCoilControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 errors["base"] = "zero_power_point_too_high"
             else:
                 self._data.update(user_input)
-                return await self.async_step_power_control_strategy()
+                return await self.async_step_thermal_protection()
 
         data_schema = vol.Schema(
             {
@@ -1830,6 +1990,66 @@ class HeatingCoilControllerOptionsFlowHandler(config_entries.OptionsFlow):
         )
 
     # ------------------------------------------------------------------
+    # Krok 4b – Thermal protection (safety fuse) – OptionsFlow
+    # ------------------------------------------------------------------
+    async def async_step_thermal_protection(self, user_input=None):
+        """Handle Thermal Protection step (OptionsFlow)."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_power_control_strategy()
+
+        # Zostaviť zoznam teplotných senzorov s friendly_name ako label
+        temp_sensor_options_dicts = [{"value": THERMAL_PROTECTION_NO_SENSOR, "label": "- - -"}]
+        for state in sorted(
+            self.hass.states.async_all("sensor"),
+            key=lambda s: (s.attributes.get("friendly_name") or s.entity_id).lower(),
+        ):
+            if (
+                state.attributes.get("device_class") == "temperature"
+                or state.attributes.get("unit_of_measurement") in ("°C", "°F", "K")
+            ):
+                friendly = state.attributes.get("friendly_name") or state.entity_id
+                temp_sensor_options_dicts.append({"value": state.entity_id, "label": f"{friendly} ({state.entity_id})"})
+
+        current_sensor = self._data.get(
+            CONF_THERMAL_PROTECTION_SENSOR_ENTITY,
+            _current(self.config_entry, CONF_THERMAL_PROTECTION_SENSOR_ENTITY, DEFAULT_THERMAL_PROTECTION_SENSOR_ENTITY),
+        )
+        known_values = {o["value"] for o in temp_sensor_options_dicts}
+        if current_sensor and current_sensor not in known_values:
+            temp_sensor_options_dicts.insert(1, {"value": current_sensor, "label": current_sensor})
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_THERMAL_PROTECTION_SENSOR_ENTITY,
+                    default=current_sensor,
+                ): SelectSelector(SelectSelectorConfig(
+                    options=temp_sensor_options_dicts,
+                    mode=SelectSelectorMode.DROPDOWN,
+                )),
+                vol.Required(
+                    CONF_THERMAL_PROTECTION_MAX_TEMP,
+                    default=self._data.get(
+                        CONF_THERMAL_PROTECTION_MAX_TEMP,
+                        _current(self.config_entry, CONF_THERMAL_PROTECTION_MAX_TEMP, DEFAULT_THERMAL_PROTECTION_MAX_TEMP),
+                    ),
+                ): NumberSelector(NumberSelectorConfig(
+                    min=MIN_THERMAL_PROTECTION_MAX_TEMP,
+                    max=MAX_THERMAL_PROTECTION_MAX_TEMP,
+                    step=1,
+                    unit_of_measurement="°C",
+                    mode=NumberSelectorMode.BOX,
+                )),
+            }
+        )
+
+        return self.async_show_form(
+            step_id="thermal_protection",
+            data_schema=data_schema,
+        )
+
+    # ------------------------------------------------------------------
     # Krok 4a – Power Control Strategy
     # ------------------------------------------------------------------
     async def async_step_power_control_strategy(self, user_input=None):
@@ -1852,6 +2072,8 @@ class HeatingCoilControllerOptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.async_step_battery_power_details()
             elif strategy == POWER_CONTROL_STRATEGY_1:
                 return await self.async_step_strategy_1_settings_part_1()
+            elif strategy == POWER_CONTROL_STRATEGY_2:
+                return await self.async_step_strategy_2_settings_part_1()
             else:
                 return await self.async_step_advanced_parameters()
 
@@ -2243,6 +2465,110 @@ class HeatingCoilControllerOptionsFlowHandler(config_entries.OptionsFlow):
             }
         )
         return self.async_show_form(step_id="strategy_1_settings_part_2", data_schema=data_schema)
+
+
+    # ------------------------------------------------------------------
+    # Krok 5b – Strategy 2 Settings part 1 (OptionsFlow)
+    # ------------------------------------------------------------------
+    async def async_step_strategy_2_settings_part_1(self, user_input=None):
+        """Handle Strategy 2 Parameters part 1 step (OptionsFlow)."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_strategy_2_settings_part_2()
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY,
+                    default=self._data.get(CONF_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY, _current(self.config_entry, CONF_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY, DEFAULT_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY)),
+                ): EntitySelector(EntitySelectorConfig(domain="sensor")),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_ENTITY,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_ENTITY, _current(self.config_entry, CONF_STRATEGY_2_POWER_GRID_ENTITY, DEFAULT_STRATEGY_2_POWER_GRID_ENTITY)),
+                ): EntitySelector(EntitySelectorConfig(domain="sensor")),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_UNIT,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_UNIT, _current(self.config_entry, CONF_STRATEGY_2_POWER_GRID_UNIT, DEFAULT_STRATEGY_2_POWER_GRID_UNIT)),
+                ): SelectSelector(SelectSelectorConfig(
+                    options=SENSOR_UNIT_OPTIONS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key="sensor_unit",
+                )),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_DEAD_ZONE_W,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_DEAD_ZONE_W, _current(self.config_entry, CONF_STRATEGY_2_POWER_GRID_DEAD_ZONE_W, DEFAULT_STRATEGY_2_POWER_GRID_DEAD_ZONE_W)),
+                ): NumberSelector(NumberSelectorConfig(min=-5000, max=5000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_OFFSET_W,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_OFFSET_W, _current(self.config_entry, CONF_STRATEGY_2_POWER_GRID_OFFSET_W, DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_W)),
+                ): NumberSelector(NumberSelectorConfig(min=-10000, max=10000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W, _current(self.config_entry, CONF_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W, DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W)),
+                ): NumberSelector(NumberSelectorConfig(min=-100000, max=100000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_ENTITY,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_ENTITY, _current(self.config_entry, CONF_STRATEGY_2_SOLAR_SENSOR_ENTITY, DEFAULT_STRATEGY_2_SOLAR_SENSOR_ENTITY)),
+                ): EntitySelector(EntitySelectorConfig(domain="sensor")),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_UNIT,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_UNIT, _current(self.config_entry, CONF_STRATEGY_2_SOLAR_SENSOR_UNIT, DEFAULT_STRATEGY_2_SOLAR_SENSOR_UNIT)),
+                ): SelectSelector(SelectSelectorConfig(
+                    options=SENSOR_UNIT_OPTIONS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key="sensor_unit",
+                )),
+                vol.Required(
+                    CONF_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE,
+                    default=self._data.get(CONF_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE, _current(self.config_entry, CONF_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE, DEFAULT_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=2000, step=0.01, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_ATTENUATION,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_ATTENUATION, _current(self.config_entry, CONF_STRATEGY_2_SOLAR_SENSOR_ATTENUATION, DEFAULT_STRATEGY_2_SOLAR_SENSOR_ATTENUATION)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+            }
+        )
+        return self.async_show_form(step_id="strategy_2_settings_part_1", data_schema=data_schema)
+
+    async def async_step_strategy_2_settings_part_2(self, user_input=None):
+        """Handle Strategy 2 Parameters part 2 step (OptionsFlow)."""
+        if user_input is not None:
+            self._data.update(user_input)
+            return await self.async_step_advanced_parameters()
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD, _current(self.config_entry, CONF_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD, DEFAULT_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=50000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD,
+                    default=self._data.get(CONF_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD, _current(self.config_entry, CONF_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD, DEFAULT_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=50000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD,
+                    default=self._data.get(CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD, _current(self.config_entry, CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD, DEFAULT_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=50000, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_UP_FAST_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_UP_FAST_POWER_STEP, _current(self.config_entry, CONF_STRATEGY_2_RAMP_UP_FAST_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_UP_FAST_POWER_STEP)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP, _current(self.config_entry, CONF_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP, _current(self.config_entry, CONF_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+                vol.Required(
+                    CONF_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP,
+                    default=self._data.get(CONF_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP, _current(self.config_entry, CONF_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP, DEFAULT_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP)),
+                ): NumberSelector(NumberSelectorConfig(min=0, max=100, step=1, mode=NumberSelectorMode.BOX)),
+            }
+        )
+        return self.async_show_form(step_id="strategy_2_settings_part_2", data_schema=data_schema)
 
 
     # ------------------------------------------------------------------

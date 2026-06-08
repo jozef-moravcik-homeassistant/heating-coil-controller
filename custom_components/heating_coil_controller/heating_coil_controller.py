@@ -37,6 +37,7 @@ class Heating_Coil_Controller_Instance:
         self._ramp_cancel_callback = None  # Cancel handle pre naplánovaný ramp callback
         self._last_dac_count: int | None = None  # Posledná odoslaná DAC hodnota (pre deduplikáciu)
         self._prev_solar_w: float | None = None  # Predchádzajúca hodnota solárneho senzora [W] pre nezávislú detekciu
+        self._prev_solar_w_s2: float | None = None  # Predchádzajúca hodnota solárneho senzora [W] pre Strategy 2
         self._was_enabled: bool = False  # Predchádzajúci stav enable switcha pre detekciu OFF→ON
 
         self.hass = None
@@ -48,7 +49,11 @@ class Heating_Coil_Controller_Instance:
             ENTITY_OUTPUT_POWER_KW: None,
             ENTITY_ENABLE: None,
             ENTITY_MAX_POWER: None,
+            ENTITY_THERMAL_PROTECTION_ACTIVE: False,
         }
+
+        # Stav bezpečnostnej poistky – interná premenná
+        self._thermal_protection_active: bool = False
 
         # Entity ID budú nastavené po nastavení entry_id
         self.SENSOR_ENTITY_OUTPUT_POWER_PERCENT = None
@@ -261,6 +266,41 @@ class Heating_Coil_Controller_Instance:
         strategy_1_solar_sensor_value_w: float = 0.0
         strategy_1_solar_sensor_attenuation: int = DEFAULT_STRATEGY_1_SOLAR_SENSOR_ATTENUATION
 
+        # Thermal protection (safety fuse)
+        thermal_protection_sensor_entity: str = DEFAULT_THERMAL_PROTECTION_SENSOR_ENTITY
+        thermal_protection_max_temp: int = DEFAULT_THERMAL_PROTECTION_MAX_TEMP
+
+        # ---------------------------------------------------------------
+        # Strategy 2 – Grid + Solar (bez batérie)
+        # ---------------------------------------------------------------
+        strategy_2_grid_export_status_entity: str = DEFAULT_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY
+        strategy_2_grid_export_status_entity_available: bool = False
+        strategy_2_grid_export_status_value: str | None = None
+
+        strategy_2_power_grid_entity: str = DEFAULT_STRATEGY_2_POWER_GRID_ENTITY
+        strategy_2_power_grid_unit: str = DEFAULT_STRATEGY_2_POWER_GRID_UNIT
+        strategy_2_power_grid_entity_available: bool = False
+        strategy_2_power_grid_value_w: float = 0.0
+        strategy_2_power_grid_dead_zone_w: int = DEFAULT_STRATEGY_2_POWER_GRID_DEAD_ZONE_W
+        strategy_2_power_grid_offset_w: int = DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_W
+        strategy_2_power_grid_offset_export_limit_w: int = DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W
+
+        strategy_2_solar_sensor_entity: str = DEFAULT_STRATEGY_2_SOLAR_SENSOR_ENTITY
+        strategy_2_solar_sensor_entity_available: bool = False
+        strategy_2_solar_sensor_unit: str = DEFAULT_STRATEGY_2_SOLAR_SENSOR_UNIT
+        strategy_2_maximum_solar_radiation_value: float = DEFAULT_STRATEGY_2_MAXIMUM_SOLAR_RADIATION_VALUE
+        strategy_2_solar_radiation_value_percent: float = 0.0
+        strategy_2_solar_sensor_value_w: float = 0.0
+        strategy_2_solar_sensor_attenuation: int = DEFAULT_STRATEGY_2_SOLAR_SENSOR_ATTENUATION
+
+        strategy_2_ramp_up_fast_power_step: int = DEFAULT_STRATEGY_2_RAMP_UP_FAST_POWER_STEP
+        strategy_2_ramp_up_slow_power_step: int = DEFAULT_STRATEGY_2_RAMP_UP_SLOW_POWER_STEP
+        strategy_2_ramp_down_fast_power_step: int = DEFAULT_STRATEGY_2_RAMP_DOWN_FAST_POWER_STEP
+        strategy_2_ramp_down_slow_power_step: int = DEFAULT_STRATEGY_2_RAMP_DOWN_SLOW_POWER_STEP
+        strategy_2_power_grid_ramp_up_fast_threshold: int = DEFAULT_STRATEGY_2_POWER_GRID_RAMP_UP_FAST_THRESHOLD
+        strategy_2_power_grid_ramp_down_fast_threshold: int = DEFAULT_STRATEGY_2_POWER_GRID_RAMP_DOWN_FAST_THRESHOLD
+        strategy_2_solar_sensor_ramp_down_fast_threshold: int = DEFAULT_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD
+
 
 # ******************************************************************************************
 # ********************** Heating Coil Controller - Controller *********************************
@@ -302,6 +342,7 @@ class Heating_Coil_Controller_Instance:
 
                 switch_enable = switches.get(ENTITY_ENABLE)
                 switch_export = switches.get(ENTITY_ONLY_USE_POWER_ABOVE_EXPORT_LIMIT)
+                switch_auto_power_control = switches.get(ENTITY_AUTO_POWER_CONTROL)
                 number_max_power = numbers.get(ENTITY_MAX_POWER)
 
                 if switch_enable is None or number_max_power is None:
@@ -319,9 +360,17 @@ class Heating_Coil_Controller_Instance:
                     LOGGER.debug("max_power entity value is None, skipping cycle")
                     return
                 self.max_power = float(number_max_power.native_value)
-                
-                LOGGER.debug("Internal Entity States: self.enable=%s, self.max_power=%s",
-                            self.enable, self.max_power)
+
+                # Ak je auto_power_control vypnutý, riadiť výkon len manuálne
+                # bez ohľadu na stratégiu v konfigurácii – platí len pre tento cyklus
+                auto_power_control_on = switch_auto_power_control.is_on if switch_auto_power_control is not None else True
+                effective_strategy = self.settings.power_control_strategy
+                if not auto_power_control_on:
+                    effective_strategy = POWER_CONTROL_STRATEGY_MANUAL
+                    LOGGER.debug("auto_power_control OFF – overriding strategy to MANUAL for this cycle")
+
+                LOGGER.debug("Internal Entity States: self.enable=%s, self.max_power=%s, auto_power_control=%s, effective_strategy=%s",
+                            self.enable, self.max_power, auto_power_control_on, effective_strategy)
 
             except Exception as e:
                 LOGGER.error(f"Failed to load entities created by this integration. Error details: {e}")
@@ -608,8 +657,63 @@ class Heating_Coil_Controller_Instance:
                     LOGGER.error(f"Error reading Strategy 1 sensors: {e}")
 
 
-# ******************************************************************************************
-# ********************** LOGIKA CONTROLLERA ************************************************
+        # **** Get Strategy 2 sensor entities (ak je aktívna Strategy 2) ****
+            if effective_strategy == POWER_CONTROL_STRATEGY_2:
+                try:
+                    # Grid export status
+                    if self.settings.strategy_2_grid_export_status_entity:
+                        val = self._get_sensor_value(self.settings.strategy_2_grid_export_status_entity)
+                        if val is not None:
+                            self.settings.strategy_2_grid_export_status_entity_available = True
+                            self.settings.strategy_2_grid_export_status_value = str(val) if not isinstance(val, str) else val
+                        else:
+                            LOGGER.warning("Strategy 2 grid export status entity %s is not available", self.settings.strategy_2_grid_export_status_entity)
+                            self.settings.strategy_2_grid_export_status_entity_available = False
+                            self.settings.strategy_2_grid_export_status_value = None
+                    else:
+                        self.settings.strategy_2_grid_export_status_entity_available = False
+                        self.settings.strategy_2_grid_export_status_value = None
+
+                    # Solar sensor
+                    if self.settings.strategy_2_solar_sensor_entity:
+                        val = self._get_sensor_value(self.settings.strategy_2_solar_sensor_entity)
+                        if val is not None and isinstance(val, (int, float)):
+                            self.settings.strategy_2_solar_sensor_entity_available = True
+                            s2_solar_raw = float(val)
+                            s2_solar_w = s2_solar_raw * 1000 if self.settings.strategy_2_solar_sensor_unit == "kW" else s2_solar_raw
+                            self.settings.strategy_2_solar_sensor_value_w = s2_solar_w
+                            if self.settings.strategy_2_maximum_solar_radiation_value > 0:
+                                self.settings.strategy_2_solar_radiation_value_percent = max(0.0, min(100.0, round(
+                                    (s2_solar_w / self.settings.strategy_2_maximum_solar_radiation_value) * 100, 2)))
+                            else:
+                                self.settings.strategy_2_solar_radiation_value_percent = 0.0
+                        else:
+                            LOGGER.warning("Strategy 2 solar sensor %s is not available", self.settings.strategy_2_solar_sensor_entity)
+                            self.settings.strategy_2_solar_sensor_entity_available = False
+                            self.settings.strategy_2_solar_radiation_value_percent = 0.0
+                            self.settings.strategy_2_solar_sensor_value_w = 0.0
+                    else:
+                        self.settings.strategy_2_solar_sensor_entity_available = False
+                        self.settings.strategy_2_solar_radiation_value_percent = 0.0
+                        self.settings.strategy_2_solar_sensor_value_w = 0.0
+
+                    # Power grid
+                    if self.settings.strategy_2_power_grid_entity:
+                        val = self._get_sensor_value(self.settings.strategy_2_power_grid_entity)
+                        if val is not None and isinstance(val, (int, float)):
+                            self.settings.strategy_2_power_grid_entity_available = True
+                            s2_grid_raw = float(val)
+                            self.settings.strategy_2_power_grid_value_w = s2_grid_raw * 1000 if self.settings.strategy_2_power_grid_unit == "kW" else s2_grid_raw
+                        else:
+                            LOGGER.warning("Strategy 2 power grid sensor %s is not available", self.settings.strategy_2_power_grid_entity)
+                            self.settings.strategy_2_power_grid_entity_available = False
+                            self.settings.strategy_2_power_grid_value_w = 0.0
+                    else:
+                        self.settings.strategy_2_power_grid_entity_available = False
+                        self.settings.strategy_2_power_grid_value_w = 0.0
+
+                except Exception as e:
+                    LOGGER.error(f"Error reading Strategy 2 sensors: {e}")
 # ******************************************************************************************
 
             # Automatické riadenie výkonu (power automation)
@@ -626,7 +730,11 @@ class Heating_Coil_Controller_Instance:
                 # MASTER alebo nezávislá špirálka: vlastná automatizácia
                 if _notify_others:
                     # Periodický beh – plné vyhodnotenie stratégie
+                    # Dočasne aplikovať effective_strategy (môže byť MANUAL kvôli auto_power_control)
+                    _original_strategy = self.settings.power_control_strategy
+                    self.settings.power_control_strategy = effective_strategy
                     automation_output = self._power_automation.power_automation(self.settings)
+                    self.settings.power_control_strategy = _original_strategy
                 else:
                     # Notifikácia z iného coilu – len prepočet výstupu z aktuálneho stavu
                     # (stratégia sa nevyhodnocuje znova, aby sa zabránilo viacnásobným krokom)
@@ -654,6 +762,16 @@ class Heating_Coil_Controller_Instance:
             if self.settings.output_power_during_day_only and output_power > 0.0:
                 if self._is_night():
                     LOGGER.debug("Night detected, output_power forced to 0 (day-only mode)")
+                    output_power = 0.0
+
+            # Bezpečnostná poistka proti prehriatiu – má prednosť pred všetkým ostatným
+            # Kontroluje sa len pre fyzické špirály (nie virtuálne)
+            if not self.settings.virtual_heating_coil:
+                if self.check_thermal_protection():
+                    LOGGER.warning(
+                        "Thermal protection active – forcing output_power to 0 (was %.1f%%)",
+                        output_power,
+                    )
                     output_power = 0.0
 
             # Synchronizovať interný stav power_automation na skutočný výstupný výkon
@@ -789,8 +907,50 @@ class Heating_Coil_Controller_Instance:
         Detekuje pokles solárneho výkonu a okamžite zníži výkon špirály
         bez čakania na tracked_entities_interval.
         """
-        # Len pre Strategy 1
-        if self.settings.power_control_strategy != POWER_CONTROL_STRATEGY_1:
+        # Určiť aktívnu stratégiu (s ohľadom na auto_power_control override)
+        _entry_data_h = self.hass.data.get(DOMAIN, {}).get(self._entry_id, {})
+        _sw_apc = _entry_data_h.get("switches", {}).get(ENTITY_AUTO_POWER_CONTROL)
+        _apc_on = _sw_apc.is_on if _sw_apc is not None else True
+        active_strategy = self.settings.power_control_strategy
+        if not _apc_on:
+            active_strategy = POWER_CONTROL_STRATEGY_MANUAL
+
+        if active_strategy == POWER_CONTROL_STRATEGY_1:
+            await self._solar_decrease_handler(
+                solar_entity=self.settings.strategy_1_solar_sensor_entity,
+                solar_unit=self.settings.strategy_1_solar_sensor_unit,
+                prev_attr="_prev_solar_w",
+                threshold=self.settings.strategy_1_solar_sensor_ramp_down_fast_threshold,
+                fast_step=self.settings.strategy_1_ramp_down_fast_power_step,
+                slow_step=self.settings.strategy_1_ramp_down_slow_power_step,
+                attenuation=self.settings.strategy_1_solar_sensor_attenuation,
+                strategy_label="Strategy 1",
+            )
+        elif active_strategy == POWER_CONTROL_STRATEGY_2:
+            await self._solar_decrease_handler(
+                solar_entity=self.settings.strategy_2_solar_sensor_entity,
+                solar_unit=self.settings.strategy_2_solar_sensor_unit,
+                prev_attr="_prev_solar_w_s2",
+                threshold=self.settings.strategy_2_solar_sensor_ramp_down_fast_threshold,
+                fast_step=self.settings.strategy_2_ramp_down_fast_power_step,
+                slow_step=self.settings.strategy_2_ramp_down_slow_power_step,
+                attenuation=self.settings.strategy_2_solar_sensor_attenuation,
+                strategy_label="Strategy 2",
+            )
+
+    async def _solar_decrease_handler(
+        self,
+        solar_entity: str,
+        solar_unit: str,
+        prev_attr: str,
+        threshold: float,
+        fast_step: float,
+        slow_step: float,
+        attenuation: int,
+        strategy_label: str,
+    ):
+        """Spoločná logika solar decrease handlera pre Strategy 1 aj Strategy 2."""
+        if not solar_entity:
             return
 
         # Ak je špirála vypnutá, preskočiť
@@ -799,34 +959,28 @@ class Heating_Coil_Controller_Instance:
 
         # Ak práve beží my_controller, preskočiť – prevezme to my_controller
         if self._is_running:
-            LOGGER.debug("Solar handler: my_controller is running, skipping")
+            LOGGER.debug("Solar handler (%s): my_controller is running, skipping", strategy_label)
             return
 
-        if not self.settings.strategy_1_solar_sensor_entity:
-            return
-
-        # Načítať aktuálnu hodnotu solárneho senzora
-        val = self._get_sensor_value(self.settings.strategy_1_solar_sensor_entity)
+        val = self._get_sensor_value(solar_entity)
         if val is None or not isinstance(val, (int, float)):
             return
 
         solar_raw = float(val)
-        solar_w = solar_raw * 1000 if self.settings.strategy_1_solar_sensor_unit == "kW" else solar_raw
+        solar_w = solar_raw * 1000 if solar_unit == "kW" else solar_raw
 
-        prev_w = self._prev_solar_w
-        self._prev_solar_w = solar_w
+        prev_w = getattr(self, prev_attr)
+        setattr(self, prev_attr, solar_w)
 
         if prev_w is None or solar_w >= prev_w:
             return
 
         decrease_w = prev_w - solar_w
-        threshold = self.settings.strategy_1_solar_sensor_ramp_down_fast_threshold
-        attenuation = self.settings.strategy_1_solar_sensor_attenuation
 
         if decrease_w > threshold:
-            raw_step = float(self.settings.strategy_1_ramp_down_fast_power_step)
+            raw_step = float(fast_step)
         else:
-            raw_step = float(self.settings.strategy_1_ramp_down_slow_power_step)
+            raw_step = float(slow_step)
 
         solar_step = raw_step * (attenuation / 100.0)
         if solar_step <= 0:
@@ -837,9 +991,9 @@ class Heating_Coil_Controller_Instance:
         self._power_automation._current_output = new_output
 
         LOGGER.debug(
-            "Solar independent handler: %.1f%% → %.1f%% (raw_step=%.0f%%, attenuation=%d%%, "
+            "Solar independent handler (%s): %.1f%% → %.1f%% (raw_step=%.0f%%, attenuation=%d%%, "
             "effective=%.1f%%, decrease=%.0fW, %s)",
-            old_output, new_output, raw_step, attenuation, solar_step, decrease_w,
+            strategy_label, old_output, new_output, raw_step, attenuation, solar_step, decrease_w,
             "FAST" if decrease_w > threshold else "slow",
         )
 
@@ -852,7 +1006,7 @@ class Heating_Coil_Controller_Instance:
             _sw_enable   = _switches.get(ENTITY_ENABLE)
             _nb_max_power = _numbers.get(ENTITY_MAX_POWER)
             if _sw_enable is None or _nb_max_power is None or _nb_max_power.native_value is None:
-                LOGGER.debug("Solar handler: internal entities not ready, skipping")
+                LOGGER.debug("Solar handler (%s): internal entities not ready, skipping", strategy_label)
                 return
             self.enable = _sw_enable.is_on
             self.max_power = float(_nb_max_power.native_value)
@@ -869,6 +1023,11 @@ class Heating_Coil_Controller_Instance:
 
             if self.settings.output_power_during_day_only and output_power > 0.0:
                 if self._is_night():
+                    output_power = 0.0
+
+            # Bezpečnostná poistka
+            if not self.settings.virtual_heating_coil:
+                if self.check_thermal_protection():
                     output_power = 0.0
 
             self._power_automation.sync_output(output_power)
@@ -888,14 +1047,14 @@ class Heating_Coil_Controller_Instance:
                 await self._send_dac_value(dac_value)
 
                 LOGGER.debug(
-                    "Solar handler output: power=%.1f%%, kW=%.1f, DAC=%.2f",
-                    output_power, output_power_kw, dac_value,
+                    "Solar handler (%s) output: power=%.1f%%, kW=%.1f, DAC=%.2f",
+                    strategy_label, output_power, output_power_kw, dac_value,
                 )
 
             async_dispatcher_send(self.hass, f"{DOMAIN}_feedback_update_{self._entry_id}")
 
         except Exception as e:
-            LOGGER.error(f"Solar handler error: {e}")
+            LOGGER.error(f"Solar handler error ({strategy_label}): {e}")
         finally:
             self._is_running = False
 
@@ -1253,6 +1412,72 @@ class Heating_Coil_Controller_Instance:
                 return limited_output_power
 
         return output_power
+
+    def check_thermal_protection(self) -> bool:
+        """Skontroluje stav bezpečnostnej poistky proti prehriatiu.
+
+        Číta teplotný senzor a aktualizuje interný stav poistky s hysterézou:
+          - Poistka sa AKTIVUJE keď teplota >= thermal_protection_max_temp
+          - Poistka sa DEAKTIVUJE keď teplota <= (thermal_protection_max_temp - THERMAL_PROTECTION_HYSTERESIS)
+
+        Returns:
+            True  – poistka je aktívna (špirálu treba vypnúť)
+            False – poistka nie je aktívna
+        """
+        sensor_entity = self.settings.thermal_protection_sensor_entity
+
+        # Ak nie je nastavený senzor, poistka je neaktívna
+        if (not sensor_entity) or (sensor_entity == THERMAL_PROTECTION_NO_SENSOR):
+            if self._thermal_protection_active:
+                self._thermal_protection_active = False
+                self.sensor_states[ENTITY_THERMAL_PROTECTION_ACTIVE] = False
+                if self.hass is not None and self._entry_id is not None:
+                    async_dispatcher_send(self.hass, f"{DOMAIN}_feedback_update_{self._entry_id}")
+            return False
+
+        if self.hass is None:
+            return self._thermal_protection_active
+
+        state_obj = self.hass.states.get(sensor_entity)
+        if state_obj is None or state_obj.state in (STATE_UNKNOWN, STATE_UNAVAILABLE, None, ""):
+            LOGGER.debug("Thermal protection: sensor %s unavailable, keeping current state=%s", sensor_entity, self._thermal_protection_active)
+            return self._thermal_protection_active
+
+        try:
+            current_temp = float(state_obj.state)
+        except (ValueError, TypeError):
+            LOGGER.warning("Thermal protection: cannot convert sensor %s state '%s' to float", sensor_entity, state_obj.state)
+            return self._thermal_protection_active
+
+        max_temp = float(self.settings.thermal_protection_max_temp)
+        deactivate_temp = max_temp - THERMAL_PROTECTION_HYSTERESIS
+
+        prev_active = self._thermal_protection_active
+
+        if not self._thermal_protection_active:
+            # Poistka nie je aktívna – aktivovať ak teplota dosiahla maximum
+            if current_temp >= max_temp:
+                self._thermal_protection_active = True
+                LOGGER.warning(
+                    "Thermal protection ACTIVATED: sensor=%s, temp=%.1f >= max_temp=%.1f",
+                    sensor_entity, current_temp, max_temp,
+                )
+        else:
+            # Poistka je aktívna – deaktivovať ak teplota klesla pod prah
+            if current_temp <= deactivate_temp:
+                self._thermal_protection_active = False
+                LOGGER.info(
+                    "Thermal protection DEACTIVATED: sensor=%s, temp=%.1f <= deactivate_temp=%.1f",
+                    sensor_entity, current_temp, deactivate_temp,
+                )
+
+        # Ak sa stav zmenil, aktualizovať sensor a notifikovať HA
+        if self._thermal_protection_active != prev_active:
+            self.sensor_states[ENTITY_THERMAL_PROTECTION_ACTIVE] = self._thermal_protection_active
+            if self.hass is not None and self._entry_id is not None:
+                async_dispatcher_send(self.hass, f"{DOMAIN}_feedback_update_{self._entry_id}")
+
+        return self._thermal_protection_active
 
     async def send_dac_output(self, _notify_others: bool = True) -> None:
         """Vypočíta výstup cez power curve a odošle na DAC cez Modbus.

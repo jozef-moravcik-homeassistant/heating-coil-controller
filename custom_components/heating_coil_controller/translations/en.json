@@ -195,6 +195,43 @@
           "strategy_1_battery_ramp_down_fast_threshold": "Battery power change threshold for Fast Ramp Down [W]",
           "strategy_1_solar_sensor_ramp_down_fast_threshold": "Solar sensor value decrease threshold for Fast Ramp Down [W]"
         }
+      },
+      "thermal_protection": {
+        "title": "Safety Fuse",
+        "description": "Configure the thermal safety fuse for overheating protection",
+        "data": {
+          "thermal_protection_sensor_entity": "Entity of Temperature sensor",
+          "thermal_protection_max_temp": "Maximum allowed temperature [°C]"
+        }
+      },
+      "strategy_2_settings_part_1": {
+        "title": "STRATEGY 2 – part 1",
+        "description": "Power control based on Grid and Solar sensor (no battery)",
+        "data": {
+          "strategy_2_grid_export_status_entity": "Grid export status entity",
+          "strategy_2_power_grid_entity": "Grid power entity",
+          "strategy_2_power_grid_unit": "Grid power unit",
+          "strategy_2_power_grid_dead_zone_w": "Dead zone width [W]",
+          "strategy_2_power_grid_offset_w": "Offset [W]",
+          "strategy_2_power_grid_offset_export_limit_w": "Export limit offset [W]",
+          "strategy_2_solar_sensor_entity": "Solar radiation sensor entity",
+          "strategy_2_solar_sensor_unit": "Sensor unit",
+          "strategy_2_maximum_solar_radiation_value": "Maximum solar radiation value",
+          "strategy_2_solar_sensor_attenuation": "Solar sensor power attenuation [%]"
+        }
+      },
+      "strategy_2_settings_part_2": {
+        "title": "STRATEGY 2 – part 2",
+        "description": "Ramp parameters for STRATEGY 2",
+        "data": {
+          "strategy_2_power_grid_ramp_up_fast_threshold": "Grid power fast ramp-up threshold [W]",
+          "strategy_2_power_grid_ramp_down_fast_threshold": "Grid power fast ramp-down threshold [W]",
+          "strategy_2_solar_sensor_ramp_down_fast_threshold": "Solar sensor fast ramp-down threshold [W]",
+          "strategy_2_ramp_up_fast_power_step": "Fast ramp-up power step [%]",
+          "strategy_2_ramp_up_slow_power_step": "Slow ramp-up power step [%]",
+          "strategy_2_ramp_down_fast_power_step": "Fast ramp-down power step [%]",
+          "strategy_2_ramp_down_slow_power_step": "Slow ramp-down power step [%]"
+        }
       }
     },
     "error": {
@@ -399,6 +436,43 @@
           "strategy_1_battery_ramp_down_fast_threshold": "Battery power change threshold for Fast Ramp Down [W]",
           "strategy_1_solar_sensor_ramp_down_fast_threshold": "Solar sensor value decrease threshold for Fast Ramp Down [W]"
         }
+      },
+      "thermal_protection": {
+        "title": "Safety Fuse",
+        "description": "Configure the thermal safety fuse for overheating protection",
+        "data": {
+          "thermal_protection_sensor_entity": "Entity of Temperature sensor",
+          "thermal_protection_max_temp": "Maximum allowed temperature [°C]"
+        }
+      },
+      "strategy_2_settings_part_1": {
+        "title": "STRATEGY 2 – part 1",
+        "description": "Power control based on Grid and Solar sensor (no battery)",
+        "data": {
+          "strategy_2_grid_export_status_entity": "Grid export status entity",
+          "strategy_2_power_grid_entity": "Grid power entity",
+          "strategy_2_power_grid_unit": "Grid power unit",
+          "strategy_2_power_grid_dead_zone_w": "Dead zone width [W]",
+          "strategy_2_power_grid_offset_w": "Offset [W]",
+          "strategy_2_power_grid_offset_export_limit_w": "Export limit offset [W]",
+          "strategy_2_solar_sensor_entity": "Solar radiation sensor entity",
+          "strategy_2_solar_sensor_unit": "Sensor unit",
+          "strategy_2_maximum_solar_radiation_value": "Maximum solar radiation value",
+          "strategy_2_solar_sensor_attenuation": "Solar sensor power attenuation [%]"
+        }
+      },
+      "strategy_2_settings_part_2": {
+        "title": "STRATEGY 2 – part 2",
+        "description": "Ramp parameters for STRATEGY 2",
+        "data": {
+          "strategy_2_power_grid_ramp_up_fast_threshold": "Grid power fast ramp-up threshold [W]",
+          "strategy_2_power_grid_ramp_down_fast_threshold": "Grid power fast ramp-down threshold [W]",
+          "strategy_2_solar_sensor_ramp_down_fast_threshold": "Solar sensor fast ramp-down threshold [W]",
+          "strategy_2_ramp_up_fast_power_step": "Fast ramp-up power step [%]",
+          "strategy_2_ramp_up_slow_power_step": "Slow ramp-up power step [%]",
+          "strategy_2_ramp_down_fast_power_step": "Fast ramp-down power step [%]",
+          "strategy_2_ramp_down_slow_power_step": "Slow ramp-down power step [%]"
+        }
       }
     },
     "error": {
@@ -504,7 +578,8 @@
         "2": "Control by Solar Power Sensor",
         "3": "Control by Photovoltaic Power",
         "4": "Control by Power Flow to/from Grid",
-        "5": "Control by Power Flow to/from Battery"
+        "5": "Control by Power Flow to/from Battery",
+        "s2": "STRATEGY 2"
       }
     }
   },
@@ -530,6 +605,9 @@
       },
       "only_use_power_above_export_limit": {
         "name": "Only use power above the export limit"
+      },
+      "auto_power_control": {
+        "name": "Automatic power control"
       }
     },
     "number": {
@@ -543,6 +621,15 @@
       },
       "on_all": {
         "name": "Turn ON all"
+      }
+    },
+    "binary_sensor": {
+      "thermal_protection_active": {
+        "name": "Safety Fuse",
+        "state": {
+          "on": "Overheated",
+          "off": "Normal"
+        }
       }
     }
   }

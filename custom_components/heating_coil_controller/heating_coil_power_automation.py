@@ -13,6 +13,7 @@ import logging
 from .const import (
     POWER_CONTROL_STRATEGY_MANUAL,
     POWER_CONTROL_STRATEGY_1,
+    POWER_CONTROL_STRATEGY_2,
     POWER_CONTROL_STRATEGY_SOLAR_SENSOR,
     POWER_CONTROL_STRATEGY_PV_POWER,
     POWER_CONTROL_STRATEGY_POWER_GRID,
@@ -178,14 +179,11 @@ class HeatingCoilPowerAutomation:
 
             # Mŕtva zóna batérie: keď sa batéria nenabíja (Scenár 3, 4), offset sa ignoruje
             # (centrum mŕtvej zóny je 0W, nie nakonfigurovaný offset).
-            # Spodná polovica mŕtvej zóny sa pri vypnutom nabíjaní neaplikuje,
-            # pretože batéria sa nedostane do záporných hodnôt.
+            # Spodná hranica môže byť záporná – pri nenabíjaní batéria nikdy nedosiahne
+            # záporné hodnoty, takže ramp UP sa z dolnej hranice nespustí.
             effective_battery_offset = battery_offset if battery_is_charging else 0
             battery_upper = effective_battery_offset + (battery_dead_zone / 2)
-            if battery_is_charging:
-                battery_lower = effective_battery_offset - (battery_dead_zone / 2)
-            else:
-                battery_lower = max(0, effective_battery_offset - (battery_dead_zone / 2))
+            battery_lower = effective_battery_offset - (battery_dead_zone / 2)
 
             LOGGER.debug(
                 "PowerAutomation STRATEGY 1 scenario=%d: export=%s, charging=%s, SOC=%.0f%%, "
@@ -203,22 +201,25 @@ class HeatingCoilPowerAutomation:
                 # Len batéria, grid ignorovaný
                 grid_ramp_up_allowed = False
                 grid_ramp_down_allowed = False
-                probing_enabled = True
+                probing_enabled = False  # Batéria aktívne nabíja – ramp UP riadi batéria, nie probing
             elif scenario == 2:
                 # Batéria + grid (len export → UP, import ignorovaný)
                 grid_ramp_up_allowed = True
                 grid_ramp_down_allowed = False
-                probing_enabled = True
+                probing_enabled = False  # Export aj batéria dávajú dostatok signálu – probing zbytočný
             elif scenario == 3:
                 # Batéria(DOWN) + grid(import → DOWN) + probing v kľudovom stave
+                # Probing má zmysel: export je OFF, batéria nenabíja (SOC=100 alebo zakázané)
+                # → jedinou cestou ako zistiť dostupný výkon FV je postupné krokovanie nahor
                 grid_ramp_up_allowed = False
                 grid_ramp_down_allowed = True
                 probing_enabled = True
             else:  # scenario 4
                 # Batéria(DOWN) + grid(oba smery)
+                # Export je ON → grid sám určí smer, probing zbytočný
                 grid_ramp_up_allowed = True
                 grid_ramp_down_allowed = True
-                probing_enabled = True
+                probing_enabled = False
 
             # Výpočet príspevku batérie
             battery_delta = self._strategy_1_battery_delta(
@@ -286,6 +287,94 @@ class HeatingCoilPowerAutomation:
                 LOGGER.debug(
                     "PowerAutomation STRATEGY 1 result: %.1f%% → %.1f%% (delta=%.1f, battery=%s, grid=%s, scenario=%d)",
                     self._current_output, new_output, delta, battery_delta, grid_delta, scenario,
+                )
+                self._current_output = new_output
+
+            result = max(0, min(100, int(round(self._current_output))))
+            return result
+
+
+        # ---------------------------------------------------------------
+        # Strategy 2 – Grid + Solar (bez batérie)
+        #
+        # Scenáre podľa stavu exportu:
+        # Scenár A: EXPORT=OFF → len grid (import → DOWN) + probing
+        # Scenár B: EXPORT=ON  → grid (export → UP, import → DOWN) + probing
+        #
+        # Solar sensor slúži len ako rýchly DROP detektor (fast ramp down
+        # pri prudkom poklese slnečného žiarenia), rovnako ako v Strategy 1.
+        # ---------------------------------------------------------------
+        if strategy == POWER_CONTROL_STRATEGY_2:
+
+            if not settings.strategy_2_grid_export_status_entity_available:
+                return 100
+            if not settings.strategy_2_power_grid_entity_available:
+                return 100
+
+            grid_export_status = settings.strategy_2_grid_export_status_value
+            export_on = (str(grid_export_status).lower() == "on")
+
+            power_grid_value = settings.strategy_2_power_grid_value_w
+            power_grid_dead_zone = settings.strategy_2_power_grid_dead_zone_w
+            if settings.only_use_power_above_export_limit:
+                power_grid_offset = settings.strategy_2_power_grid_offset_export_limit_w
+            else:
+                power_grid_offset = settings.strategy_2_power_grid_offset_w
+            grid_upper = power_grid_offset + (power_grid_dead_zone / 2)
+            grid_lower = power_grid_offset - (power_grid_dead_zone / 2)
+
+            coil_power_w = settings.heating_coil_power * 1000
+
+            if not export_on:
+                scenario = "A"   # Export OFF – len import → DOWN + probing
+                # Probing má zmysel: export je OFF, jedinou cestou ako zistiť
+                # dostupný výkon FV je postupné krokovanie nahor
+                grid_ramp_up_allowed = False
+                grid_ramp_down_allowed = True
+                probing_enabled = True
+            else:
+                scenario = "B"   # Export ON – oba smery, probing zbytočný
+                grid_ramp_up_allowed = True
+                grid_ramp_down_allowed = True
+                probing_enabled = False
+
+            LOGGER.debug(
+                "PowerAutomation STRATEGY 2 scenario=%s: export=%s, "
+                "grid=%dW [%.0f..%.0f]",
+                scenario, grid_export_status,
+                power_grid_value, grid_lower, grid_upper,
+            )
+
+            # Výpočet príspevku gridu (vlastná helper metóda pre Strategy 2)
+            grid_delta = self._strategy_2_grid_delta(
+                power_grid_value=power_grid_value,
+                upper=grid_upper,
+                lower=grid_lower,
+                ramp_up_allowed=grid_ramp_up_allowed,
+                ramp_down_allowed=grid_ramp_down_allowed,
+                coil_power_w=coil_power_w,
+                settings=settings,
+            )
+
+            delta = 0.0
+            if grid_delta is not None:
+                delta = grid_delta
+
+            # Probing: grid v mŕtvej zóne → pomalý krok nahor (len v Scenári A)
+            if probing_enabled and grid_delta is None and delta == 0.0:
+                probe_step = float(settings.strategy_2_ramp_up_slow_power_step)
+                if probe_step > 0:
+                    delta = probe_step
+                    LOGGER.debug(
+                        "PowerAutomation STRATEGY 2 probing: slow step UP %.1f%%",
+                        probe_step,
+                    )
+
+            if delta != 0.0:
+                new_output = max(0.0, min(100.0, self._current_output + delta))
+                LOGGER.debug(
+                    "PowerAutomation STRATEGY 2 result: %.1f%% → %.1f%% (delta=%.1f, grid=%s, scenario=%s)",
+                    self._current_output, new_output, delta, grid_delta, scenario,
                 )
                 self._current_output = new_output
 
@@ -880,6 +969,67 @@ class HeatingCoilPowerAutomation:
                 step = settings.strategy_1_ramp_up_slow_power_step
                 LOGGER.debug(
                     "STRATEGY 1 grid slow UP: step=%d, grid=%.0fW",
+                    step, power_grid_value,
+                )
+            return float(step) if step > 0 else None
+
+        # V mŕtvej zóne
+        return None
+
+    def _strategy_2_grid_delta(
+        self,
+        power_grid_value: float,
+        upper: float,
+        lower: float,
+        ramp_up_allowed: bool,
+        ramp_down_allowed: bool,
+        coil_power_w: float,
+        settings,
+    ) -> float | None:
+        """Vypočíta príspevok gridu pre Strategy 2 (Grid + Solar, bez batérie).
+
+        Identická logika ako _strategy_1_grid_delta, číta však strategy_2_* settings.
+        """
+        # Import zo siete (power_grid_value < lower) → ramp DOWN
+        if ramp_down_allowed and power_grid_value < lower:
+            import_power = abs(power_grid_value)
+            if import_power >= settings.strategy_2_power_grid_ramp_down_fast_threshold:
+                step = settings.strategy_2_ramp_down_fast_power_step
+                LOGGER.debug(
+                    "STRATEGY 2 grid FAST DOWN: step=%d, grid=%.0fW, threshold=%.0f",
+                    step, power_grid_value, settings.strategy_2_power_grid_ramp_down_fast_threshold,
+                )
+            else:
+                step = settings.strategy_2_ramp_down_slow_power_step
+                LOGGER.debug(
+                    "STRATEGY 2 grid slow DOWN: step=%d, grid=%.0fW",
+                    step, power_grid_value,
+                )
+            return -float(step) if step > 0 else None
+
+        # Export do siete (power_grid_value > upper) → ramp UP (s cap algoritmom)
+        if ramp_up_allowed and power_grid_value > upper:
+            available_w = power_grid_value - upper
+
+            if power_grid_value >= settings.strategy_2_power_grid_ramp_up_fast_threshold:
+                fast_step_w = (settings.strategy_2_ramp_up_fast_power_step / 100.0) * coil_power_w
+                if fast_step_w <= available_w:
+                    step = settings.strategy_2_ramp_up_fast_power_step
+                    LOGGER.debug(
+                        "STRATEGY 2 grid FAST UP: step=%d, grid=%.0fW, available=%.0fW",
+                        step, power_grid_value, available_w,
+                    )
+                else:
+                    step = settings.strategy_2_ramp_up_slow_power_step
+                    LOGGER.debug(
+                        "STRATEGY 2 grid FAST→SLOW UP (capped): step=%d, grid=%.0fW, "
+                        "available=%.0fW, fast_would_be=%.0fW",
+                        step, power_grid_value, available_w, fast_step_w,
+                    )
+            else:
+                step = settings.strategy_2_ramp_up_slow_power_step
+                LOGGER.debug(
+                    "STRATEGY 2 grid slow UP: step=%d, grid=%.0fW",
                     step, power_grid_value,
                 )
             return float(step) if step > 0 else None
