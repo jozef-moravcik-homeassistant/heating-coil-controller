@@ -5,7 +5,7 @@
 
 Home Assistant integration designed for manual and automatic control of the power of heating coils in heating systems (boilers). The goal of automatic control is the efficient use of energy produced by the photovoltaic system, so that excess energy or the unsalable part of the energy can be consumed and used for heat production. This integration allows the coil power to accurately copy the current power curve of the produced energy and quickly respond to changes in the production of PV systems. A complicated power control strategy monitors the current power flow to the grid, power flow to the battery, monitors the power of solar radiation and other input data.
 
-All releases 0.01.xx are currently only BETA versions and are currently undergoing testing on several production systems.
+All releases 0.xx.xx are currently only BETA versions and are currently undergoing testing on several production systems.
 After testing is complete, a new release series will be released starting with 1.xx.xx
 
 ## Features
