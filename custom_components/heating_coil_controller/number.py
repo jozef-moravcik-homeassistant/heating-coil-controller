@@ -40,6 +40,7 @@ from .const import (
     CONF_MODBUS_DEVICE_ID,
     DEFAULT_MODBUS_DEVICE_ID,
     POWER_CONTROL_STRATEGY_MANUAL,
+    ENTITY_AUTO_POWER_CONTROL,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -267,11 +268,14 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
             self._group_syncing = False
 
     async def _trigger_manual_mode_update(self) -> None:
-        """Okamžite spustí my_controller ak je aktívna manuálna stratégia.
+        """Okamžite spustí my_controller ak je aktívne manuálne riadenie.
 
-        Volá sa po zmene max_power slidera. Týka sa len inštancií kde je
-        stratégia MANUAL – ostatné stratégie si riadia vlastný rytmus
-        a táto metóda ich neovplyvní.
+        Volá sa po zmene max_power slidera. Manuálne riadenie nastáva ak:
+        - stratégia je nastavená na MANUAL, alebo
+        - switch auto_power_control je vypnutý (override na MANUAL)
+
+        Ostatné stratégie (s aktívnym auto_power_control) si riadia vlastný
+        rytmus a táto metóda ich neovplyvní.
         """
         try:
             domain_data = self.hass.data.get(DOMAIN, {})
@@ -281,12 +285,25 @@ class NumberEntityDefinition(NumberEntity, RestoreEntity):
                 return
 
             strategy = instance.settings.power_control_strategy
-            if strategy != POWER_CONTROL_STRATEGY_MANUAL:
+
+            # Skontrolovať aj stav auto_power_control switchu
+            switches = entry_data.get("switches", {})
+            switch_auto_power_control = switches.get(ENTITY_AUTO_POWER_CONTROL)
+            auto_power_control_on = (
+                switch_auto_power_control.is_on
+                if switch_auto_power_control is not None
+                else True
+            )
+
+            # Manuálne riadenie: stratégia MANUAL alebo auto_power_control vypnutý
+            is_manual_mode = (strategy == POWER_CONTROL_STRATEGY_MANUAL) or (not auto_power_control_on)
+            if not is_manual_mode:
                 return
 
             LOGGER.debug(
-                "Manual mode: triggering immediate my_controller after max_power change (%.1f%%)",
-                self._attr_native_value,
+                "Manual mode: triggering immediate my_controller after max_power change (%.1f%%) "
+                "[strategy=%s, auto_power_control=%s]",
+                self._attr_native_value, strategy, auto_power_control_on,
             )
             await instance.my_controller()
         except Exception as e:

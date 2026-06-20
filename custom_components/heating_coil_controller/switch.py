@@ -211,6 +211,27 @@ class SwitchEntityDefinition(SwitchEntity, RestoreEntity):
             await self._sync_group_enable(False)
         if self._entity_id == ENTITY_AUTO_POWER_CONTROL:
             await self._sync_group_auto_power_control(False)
+            # Okamžite aplikovať výkon podľa max_power bez čakania na interval
+            await self._trigger_manual_mode_update()
+
+    async def _trigger_manual_mode_update(self) -> None:
+        """Okamžite spustí my_controller po vypnutí auto_power_control.
+
+        Zabezpečí, že výstupný výkon sa okamžite nastaví podľa hodnoty
+        max_power bez čakania na tracked_entities_interval.
+        """
+        try:
+            domain_data = self.hass.data.get(DOMAIN, {})
+            entry_data = domain_data.get(self._entry_id, {})
+            instance = entry_data.get("instance")
+            if instance is None:
+                return
+            LOGGER.debug(
+                "auto_power_control OFF: triggering immediate my_controller (max_power will be applied)"
+            )
+            await instance.my_controller()
+        except Exception as e:
+            LOGGER.error("Error in _trigger_manual_mode_update: %s", e)
 
     async def _sync_group_enable(self, turn_on: bool) -> None:
         """Synchronizuje ON/OFF stav z Master na Slave špirálky (jednosmerná synchronizácia).
