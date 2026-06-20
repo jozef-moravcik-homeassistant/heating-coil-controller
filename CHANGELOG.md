@@ -3,6 +3,10 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/jozef-moravcik-homeassistant/heating-coil-controller)](https://github.com/jozef-moravcik-homeassistant/template-integration/releases)
 
+## v0.01.04
+### Fixes:
+- The display of integer number entities number.heating_coil_n_max_power has changed, the decimal number is no longer displayed.
+
 ## v0.01.03
 
 # New features
