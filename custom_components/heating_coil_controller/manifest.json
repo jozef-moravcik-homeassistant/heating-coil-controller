@@ -3,7 +3,7 @@
   "name": "Heating Coil Controller",
   "codeowners": ["@jozef-moravcik-homeassistant"],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["modbus"],
   "documentation": "https://github.com/jozef-moravcik-homeassistant/heating-coil-controller",
   "integration_type": "device",
   "iot_class": "local_polling",
