@@ -539,10 +539,10 @@
     },
     "modbus_parity": {
       "options": {
-        "N": "None",
-        "E": "Even",
-        "O": "Odd",
-        "M": "Mark"
+        "n": "None",
+        "e": "Even",
+        "o": "Odd",
+        "m": "Mark"
       }
     },
     "dac_output_type": {
@@ -567,8 +567,8 @@
     },
     "sensor_unit": {
       "options": {
-        "W": "W",
-        "kW": "kW"
+        "w": "W",
+        "kw": "kW"
       }
     },
     "power_control_strategy": {

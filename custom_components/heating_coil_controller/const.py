@@ -194,7 +194,7 @@ MAX_MODBUS_DEVICE_ID              = 254
 DEFAULT_MODBUS_BAUDRATE           = 9600
 DEFAULT_MODBUS_BYTESIZE           = 8
 DEFAULT_MODBUS_STOPBITS           = 1
-DEFAULT_MODBUS_PARITY             = "N"
+DEFAULT_MODBUS_PARITY             = "n"
 DEFAULT_MODBUS_DELAY              = 1
 DEFAULT_MODBUS_MESSAGE_WAIT       = 50
 DEFAULT_MODBUS_TIMEOUT            = 1
@@ -203,8 +203,8 @@ DEFAULT_MODBUS_TCP_PORT           = 502
 MODBUS_BAUDRATE_OPTIONS  = [300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 56000, 57600, 115200, 128000, 230400, 256000]
 MODBUS_BYTESIZE_OPTIONS  = [5, 6, 7, 8]
 MODBUS_STOPBITS_OPTIONS  = [1, 2]
-# N = None, E = Even, O = Odd, M = Mark
-MODBUS_PARITY_OPTIONS    = ["N", "E", "O", "M"]
+# n = None, e = Even, o = Odd, m = Mark
+MODBUS_PARITY_OPTIONS    = ["n", "e", "o", "m"]
 
 ##############################################################################################################################
 # DAC output configuration ###################################################################################################
@@ -293,7 +293,7 @@ CONF_SOLAR_SENSOR_RAMP_DOWN_POWER_CYCLE = "solar_sensor_ramp_down_power_cycle"
 
 DEFAULT_SOLAR_SENSOR_ENABLE              = False
 DEFAULT_SOLAR_SENSOR_ENTITY              = ""
-DEFAULT_SOLAR_SENSOR_UNIT                = "kW"
+DEFAULT_SOLAR_SENSOR_UNIT                = "kw"
 DEFAULT_MAXIMUM_SOLAR_RADIATION_VALUE    = 1500
 DEFAULT_SOLAR_SENSOR_ATTENUATION         = 100
 DEFAULT_SOLAR_SENSOR_RAMP_UP_POWER_STEP  = 2
@@ -316,7 +316,7 @@ CONF_PV_POWER_RAMP_DOWN_POWER_CYCLE = "pv_power_ramp_down_power_cycle"
 
 DEFAULT_PV_POWER_ENABLE              = False
 DEFAULT_PV_POWER_ENTITY              = ""
-DEFAULT_PV_POWER_UNIT                = "kW"
+DEFAULT_PV_POWER_UNIT                = "kw"
 DEFAULT_PV_POWER_MAX_POWER           = 10.0
 DEFAULT_PV_POWER_RATIO         = 100
 DEFAULT_PV_POWER_RAMP_UP_POWER_STEP  = 2
@@ -327,8 +327,8 @@ DEFAULT_PV_POWER_RAMP_DOWN_POWER_CYCLE = 2
 ##############################################################################################################################
 # Sensor unit options (shared across all power control sections) #############################################################
 ##############################################################################################################################
-SENSOR_UNIT_W  = "W"
-SENSOR_UNIT_KW = "kW"
+SENSOR_UNIT_W  = "w"
+SENSOR_UNIT_KW = "kw"
 SENSOR_UNIT_OPTIONS = [SENSOR_UNIT_W, SENSOR_UNIT_KW]
 DEFAULT_SENSOR_UNIT = SENSOR_UNIT_KW
 
@@ -348,7 +348,7 @@ CONF_POWER_GRID_RAMP_DOWN_POWER_CYCLE = "power_grid_ramp_down_power_cycle"
 
 DEFAULT_POWER_GRID_ENABLE              = False
 DEFAULT_POWER_GRID_ENTITY              = ""
-DEFAULT_POWER_GRID_UNIT                = "kW"
+DEFAULT_POWER_GRID_UNIT                = "kw"
 DEFAULT_POWER_GRID_DEAD_ZONE_W        = 300
 DEFAULT_POWER_GRID_OFFSET_W           = 100
 DEFAULT_POWER_GRID_OFFSET_EXPORT_LIMIT_W = 9000
@@ -372,7 +372,7 @@ CONF_BATTERY_POWER_RAMP_DOWN_POWER_CYCLE = "battery_power_ramp_down_power_cycle"
 
 DEFAULT_BATTERY_POWER_ENABLE              = False
 DEFAULT_BATTERY_POWER_ENTITY              = ""
-DEFAULT_BATTERY_POWER_UNIT                = "kW"
+DEFAULT_BATTERY_POWER_UNIT                = "kw"
 DEFAULT_BATTERY_POWER_DEAD_ZONE_W        = 300
 DEFAULT_BATTERY_POWER_OFFSET_W           = -1000
 DEFAULT_BATTERY_POWER_RAMP_UP_POWER_STEP  = 2
@@ -404,7 +404,7 @@ CONF_STRATEGY_1_SOLAR_SENSOR_ATTENUATION  = "strategy_1_solar_sensor_attenuation
 
 DEFAULT_STRATEGY_1_GRID_EXPORT_STATUS_ENTITY = ""
 DEFAULT_STRATEGY_1_POWER_GRID_ENTITY         = ""
-DEFAULT_STRATEGY_1_POWER_GRID_UNIT           = "kW"
+DEFAULT_STRATEGY_1_POWER_GRID_UNIT           = "kw"
 DEFAULT_STRATEGY_1_POWER_GRID_DEAD_ZONE_W    = 300
 DEFAULT_STRATEGY_1_POWER_GRID_OFFSET_W       = 100
 DEFAULT_STRATEGY_1_POWER_GRID_OFFSET_EXPORT_LIMIT_W = 9000
@@ -464,7 +464,7 @@ CONF_STRATEGY_2_SOLAR_SENSOR_RAMP_DOWN_FAST_THRESHOLD = "strategy_2_solar_sensor
 
 DEFAULT_STRATEGY_2_GRID_EXPORT_STATUS_ENTITY            = ""
 DEFAULT_STRATEGY_2_POWER_GRID_ENTITY                    = ""
-DEFAULT_STRATEGY_2_POWER_GRID_UNIT                      = "kW"
+DEFAULT_STRATEGY_2_POWER_GRID_UNIT                      = "kw"
 DEFAULT_STRATEGY_2_POWER_GRID_DEAD_ZONE_W               = 300
 DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_W                  = 100
 DEFAULT_STRATEGY_2_POWER_GRID_OFFSET_EXPORT_LIMIT_W     = 9000
