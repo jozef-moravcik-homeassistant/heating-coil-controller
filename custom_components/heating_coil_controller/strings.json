@@ -77,9 +77,9 @@
         "title": "Adjusting the output power curve",
         "description": "Set the output power curve parameters",
         "data": {
-          "zero_power_point": "Zero power point [%]",
-          "maximum_power_point": "Maximum power point [%]",
-          "gamma": "Gamma [%]"
+          "zero_power_point": "Zero power point (%)",
+          "maximum_power_point": "Maximum power point (%)",
+          "gamma": "Gamma (%)"
         }
       },
       "solar_sensor_details": {
@@ -88,10 +88,10 @@
           "solar_sensor_entity": "Select Solar Radiation Sensor",
           "solar_sensor_unit": "Sensor unit",
           "maximum_solar_radiation_value": "Maximum solar radiation value",
-          "solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]",
-          "solar_sensor_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "solar_sensor_attenuation": "Power attenuation by solar radiation sensor (%)",
+          "solar_sensor_ramp_up_power_step": "Ramp Up Power Step (%)",
           "solar_sensor_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "solar_sensor_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "solar_sensor_ramp_down_power_step": "Ramp Down Power Step (%)",
           "solar_sensor_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -101,10 +101,10 @@
           "pv_power_entity": "Select Photovoltaic current power sensor",
           "pv_power_unit": "Sensor unit",
           "pv_power_max_power": "Maximum photovoltaic power",
-          "pv_power_ratio": "PV power ratio to output power [%]",
-          "pv_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "pv_power_ratio": "PV power ratio to output power (%)",
+          "pv_power_ramp_up_power_step": "Ramp Up Power Step (%)",
           "pv_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "pv_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "pv_power_ramp_down_power_step": "Ramp Down Power Step (%)",
           "pv_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -116,9 +116,9 @@
           "power_grid_dead_zone_w": "Dead zone width [W]",
           "power_grid_offset_w": "Offset [W]",
           "power_grid_offset_export_limit_w": "Offset for Export limit [W]",
-          "power_grid_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "power_grid_ramp_up_power_step": "Ramp Up Power Step (%)",
           "power_grid_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "power_grid_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "power_grid_ramp_down_power_step": "Ramp Down Power Step (%)",
           "power_grid_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -129,9 +129,9 @@
           "battery_power_unit": "Sensor unit",
           "battery_power_dead_zone_w": "Dead zone width [W]",
           "battery_power_offset_w": "Offset [W]",
-          "battery_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "battery_power_ramp_up_power_step": "Ramp Up Power Step (%)",
           "battery_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "battery_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "battery_power_ramp_down_power_step": "Ramp Down Power Step (%)",
           "battery_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -179,16 +179,16 @@
           "strategy_1_solar_sensor_entity": "Select Solar Radiation Sensor",
           "strategy_1_solar_sensor_unit": "Sensor unit",
           "strategy_1_maximum_solar_radiation_value": "Maximum solar radiation value",
-          "strategy_1_solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]"
+          "strategy_1_solar_sensor_attenuation": "Power attenuation by solar radiation sensor (%)"
         }
       },
       "strategy_1_settings_part_2": {
         "title": "STRATEGY 1 – part 2",
         "data": {
-          "strategy_1_ramp_up_fast_power_step": "Ramp Up Fast Power Step [%]",
-          "strategy_1_ramp_up_slow_power_step": "Ramp Up Slow Power Step [%]",
-          "strategy_1_ramp_down_fast_power_step": "Ramp Down Fast Power Step [%]",
-          "strategy_1_ramp_down_slow_power_step": "Ramp Down Slow Power Step [%]",
+          "strategy_1_ramp_up_fast_power_step": "Ramp Up Fast Power Step (%)",
+          "strategy_1_ramp_up_slow_power_step": "Ramp Up Slow Power Step (%)",
+          "strategy_1_ramp_down_fast_power_step": "Ramp Down Fast Power Step (%)",
+          "strategy_1_ramp_down_slow_power_step": "Ramp Down Slow Power Step (%)",
           "strategy_1_power_grid_ramp_up_fast_threshold": "Grid Power change threshold for Fast Ramp Up [W]",
           "strategy_1_power_grid_ramp_down_fast_threshold": "Grid Power change threshold for Fast Ramp Down [W]",
           "strategy_1_battery_ramp_up_fast_threshold": "Battery power change threshold for Fast Ramp Up [W]",
@@ -217,7 +217,7 @@
           "strategy_2_solar_sensor_entity": "Solar radiation sensor entity",
           "strategy_2_solar_sensor_unit": "Sensor unit",
           "strategy_2_maximum_solar_radiation_value": "Maximum solar radiation value",
-          "strategy_2_solar_sensor_attenuation": "Solar sensor power attenuation [%]"
+          "strategy_2_solar_sensor_attenuation": "Solar sensor power attenuation (%)"
         }
       },
       "strategy_2_settings_part_2": {
@@ -227,10 +227,10 @@
           "strategy_2_power_grid_ramp_up_fast_threshold": "Grid power fast ramp-up threshold [W]",
           "strategy_2_power_grid_ramp_down_fast_threshold": "Grid power fast ramp-down threshold [W]",
           "strategy_2_solar_sensor_ramp_down_fast_threshold": "Solar sensor fast ramp-down threshold [W]",
-          "strategy_2_ramp_up_fast_power_step": "Fast ramp-up power step [%]",
-          "strategy_2_ramp_up_slow_power_step": "Slow ramp-up power step [%]",
-          "strategy_2_ramp_down_fast_power_step": "Fast ramp-down power step [%]",
-          "strategy_2_ramp_down_slow_power_step": "Slow ramp-down power step [%]"
+          "strategy_2_ramp_up_fast_power_step": "Fast ramp-up power step (%)",
+          "strategy_2_ramp_up_slow_power_step": "Slow ramp-up power step (%)",
+          "strategy_2_ramp_down_fast_power_step": "Fast ramp-down power step (%)",
+          "strategy_2_ramp_down_slow_power_step": "Slow ramp-down power step (%)"
         }
       }
     },
@@ -318,9 +318,9 @@
         "title": "Adjusting the output power curve",
         "description": "Set the output power curve parameters",
         "data": {
-          "zero_power_point": "Zero power point [%]",
-          "maximum_power_point": "Maximum power point [%]",
-          "gamma": "Gamma [%]"
+          "zero_power_point": "Zero power point (%)",
+          "maximum_power_point": "Maximum power point (%)",
+          "gamma": "Gamma (%)"
         }
       },
       "solar_sensor_details": {
@@ -329,10 +329,10 @@
           "solar_sensor_entity": "Select Solar Radiation Sensor",
           "solar_sensor_unit": "Sensor unit",
           "maximum_solar_radiation_value": "Maximum solar radiation value",
-          "solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]",
-          "solar_sensor_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "solar_sensor_attenuation": "Power attenuation by solar radiation sensor (%)",
+          "solar_sensor_ramp_up_power_step": "Ramp Up Power Step (%)",
           "solar_sensor_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "solar_sensor_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "solar_sensor_ramp_down_power_step": "Ramp Down Power Step (%)",
           "solar_sensor_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -342,10 +342,10 @@
           "pv_power_entity": "Select Photovoltaic current power sensor",
           "pv_power_unit": "Sensor unit",
           "pv_power_max_power": "Maximum photovoltaic power",
-          "pv_power_ratio": "PV power ratio to output power [%]",
-          "pv_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "pv_power_ratio": "PV power ratio to output power (%)",
+          "pv_power_ramp_up_power_step": "Ramp Up Power Step (%)",
           "pv_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "pv_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "pv_power_ramp_down_power_step": "Ramp Down Power Step (%)",
           "pv_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -357,9 +357,9 @@
           "power_grid_dead_zone_w": "Dead zone width [W]",
           "power_grid_offset_w": "Offset [W]",
           "power_grid_offset_export_limit_w": "Offset for Export limit [W]",
-          "power_grid_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "power_grid_ramp_up_power_step": "Ramp Up Power Step (%)",
           "power_grid_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "power_grid_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "power_grid_ramp_down_power_step": "Ramp Down Power Step (%)",
           "power_grid_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -370,9 +370,9 @@
           "battery_power_unit": "Sensor unit",
           "battery_power_dead_zone_w": "Dead zone width [W]",
           "battery_power_offset_w": "Offset [W]",
-          "battery_power_ramp_up_power_step": "Ramp Up Power Step [%]",
+          "battery_power_ramp_up_power_step": "Ramp Up Power Step (%)",
           "battery_power_ramp_up_power_cycle": "Ramp Up Power Cycle [s]",
-          "battery_power_ramp_down_power_step": "Ramp Down Power Step [%]",
+          "battery_power_ramp_down_power_step": "Ramp Down Power Step (%)",
           "battery_power_ramp_down_power_cycle": "Ramp Down Power Cycle [s]"
         }
       },
@@ -420,16 +420,16 @@
           "strategy_1_solar_sensor_entity": "Select Solar Radiation Sensor",
           "strategy_1_solar_sensor_unit": "Sensor unit",
           "strategy_1_maximum_solar_radiation_value": "Maximum solar radiation value",
-          "strategy_1_solar_sensor_attenuation": "Power attenuation by solar radiation sensor [%]"
+          "strategy_1_solar_sensor_attenuation": "Power attenuation by solar radiation sensor (%)"
         }
       },
       "strategy_1_settings_part_2": {
         "title": "STRATEGY 1 – part 2",
         "data": {
-          "strategy_1_ramp_up_fast_power_step": "Ramp Up Fast Power Step [%]",
-          "strategy_1_ramp_up_slow_power_step": "Ramp Up Slow Power Step [%]",
-          "strategy_1_ramp_down_fast_power_step": "Ramp Down Fast Power Step [%]",
-          "strategy_1_ramp_down_slow_power_step": "Ramp Down Slow Power Step [%]",
+          "strategy_1_ramp_up_fast_power_step": "Ramp Up Fast Power Step (%)",
+          "strategy_1_ramp_up_slow_power_step": "Ramp Up Slow Power Step (%)",
+          "strategy_1_ramp_down_fast_power_step": "Ramp Down Fast Power Step (%)",
+          "strategy_1_ramp_down_slow_power_step": "Ramp Down Slow Power Step (%)",
           "strategy_1_power_grid_ramp_up_fast_threshold": "Grid Power change threshold for Fast Ramp Up [W]",
           "strategy_1_power_grid_ramp_down_fast_threshold": "Grid Power change threshold for Fast Ramp Down [W]",
           "strategy_1_battery_ramp_up_fast_threshold": "Battery power change threshold for Fast Ramp Up [W]",
@@ -458,7 +458,7 @@
           "strategy_2_solar_sensor_entity": "Solar radiation sensor entity",
           "strategy_2_solar_sensor_unit": "Sensor unit",
           "strategy_2_maximum_solar_radiation_value": "Maximum solar radiation value",
-          "strategy_2_solar_sensor_attenuation": "Solar sensor power attenuation [%]"
+          "strategy_2_solar_sensor_attenuation": "Solar sensor power attenuation (%)"
         }
       },
       "strategy_2_settings_part_2": {
@@ -468,10 +468,10 @@
           "strategy_2_power_grid_ramp_up_fast_threshold": "Grid power fast ramp-up threshold [W]",
           "strategy_2_power_grid_ramp_down_fast_threshold": "Grid power fast ramp-down threshold [W]",
           "strategy_2_solar_sensor_ramp_down_fast_threshold": "Solar sensor fast ramp-down threshold [W]",
-          "strategy_2_ramp_up_fast_power_step": "Fast ramp-up power step [%]",
-          "strategy_2_ramp_up_slow_power_step": "Slow ramp-up power step [%]",
-          "strategy_2_ramp_down_fast_power_step": "Fast ramp-down power step [%]",
-          "strategy_2_ramp_down_slow_power_step": "Slow ramp-down power step [%]"
+          "strategy_2_ramp_up_fast_power_step": "Fast ramp-up power step (%)",
+          "strategy_2_ramp_up_slow_power_step": "Slow ramp-up power step (%)",
+          "strategy_2_ramp_down_fast_power_step": "Fast ramp-down power step (%)",
+          "strategy_2_ramp_down_slow_power_step": "Slow ramp-down power step (%)"
         }
       }
     },
@@ -592,7 +592,7 @@
         "name": "Error Code"
       },
       "output_power_percent": {
-        "name": "Output Power [%]"
+        "name": "Output Power (%)"
       },
       "output_power_kw": {
         "name": "Output Power [kW]"
