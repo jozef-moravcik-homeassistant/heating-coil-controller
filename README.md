@@ -1,7 +1,8 @@
 # Heating Coil Controller
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-[![GitHub Release](https://img.shields.io/github/v/release/jozef-moravcik-homeassistant/heating-coil-controller)](https://github.com/jozef-moravcik-homeassistant/template-integration/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/jozef-moravcik-homeassistant/heating-coil-controller)](https://github.com/jozef-moravcik-homeassistant/heating-coil-controller/releases)
+[![License](https://img.shields.io/github/license/jozef-moravcik-homeassistant/heating-coil-controller.svg)](LICENSE)
 
 Home Assistant integration designed for manual and automatic control of the power of heating coils in heating systems (boilers). The goal of automatic control is the efficient use of energy produced by the photovoltaic system, so that excess energy or the unsalable part of the energy can be consumed and used for heat production. This integration allows the coil power to accurately copy the current power curve of the produced energy and quickly respond to changes in the production of PV systems. A complicated power control strategy monitors the current power flow to the grid, power flow to the battery, monitors the power of solar radiation and other input data.
 
