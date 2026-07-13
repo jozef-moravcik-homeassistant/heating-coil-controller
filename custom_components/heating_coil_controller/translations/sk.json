@@ -539,10 +539,10 @@
     },
     "modbus_parity": {
       "options": {
-        "N": "Žiadna",
-        "E": "Párna",
-        "O": "Nepárna",
-        "M": "Mark"
+        "n": "Žiadna",
+        "e": "Párna",
+        "o": "Nepárna",
+        "m": "Mark"
       }
     },
     "dac_output_type": {
@@ -567,8 +567,8 @@
     },
     "sensor_unit": {
       "options": {
-        "W": "W",
-        "kW": "kW"
+        "w": "W",
+        "kw": "kW"
       }
     },
     "power_control_strategy": {
