@@ -77,9 +77,9 @@
         "title": "Nastavenie krivky výstupného výkonu",
         "description": "Nastavenie parametrov krivky výstupného výkonu",
         "data": {
-          "zero_power_point": "Bod nulového výkonu [%]",
-          "maximum_power_point": "Bod maximálneho výkonu [%]",
-          "gamma": "Gamma [%]"
+          "zero_power_point": "Bod nulového výkonu (%)",
+          "maximum_power_point": "Bod maximálneho výkonu (%)",
+          "gamma": "Gamma (%)"
         }
       },
       "solar_sensor_details": {
@@ -88,10 +88,10 @@
           "solar_sensor_entity": "Výber senzoru intenzity slnečného žiarenia",
           "solar_sensor_unit": "Merná jednotka senzora",
           "maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
-          "solar_sensor_attenuation": "Útlm výkonu senzorom intenzity slnečného žiarenia [%]",
-          "solar_sensor_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "solar_sensor_attenuation": "Útlm výkonu senzorom intenzity slnečného žiarenia (%)",
+          "solar_sensor_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "solar_sensor_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "solar_sensor_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "solar_sensor_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "solar_sensor_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -101,10 +101,10 @@
           "pv_power_entity": "Výber senzoru aktuálneho výkonu fotovoltaiky",
           "pv_power_unit": "Merná jednotka senzora",
           "pv_power_max_power": "Maximálny výkon fotovoltaiky",
-          "pv_power_ratio": "Pomer FV výkonu k výstupnému výkonu [%]",
-          "pv_power_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "pv_power_ratio": "Pomer FV výkonu k výstupnému výkonu (%)",
+          "pv_power_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "pv_power_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "pv_power_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "pv_power_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "pv_power_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -116,9 +116,9 @@
           "power_grid_dead_zone_w": "Šírka mŕtvej zóny [W]",
           "power_grid_offset_w": "Offset [W]",
           "power_grid_offset_export_limit_w": "Offset pre Export limit [W]",
-          "power_grid_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "power_grid_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "power_grid_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "power_grid_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "power_grid_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "power_grid_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -129,9 +129,9 @@
           "battery_power_unit": "Merná jednotka senzora",
           "battery_power_dead_zone_w": "Šírka mŕtvej zóny [W]",
           "battery_power_offset_w": "Offset [W]",
-          "battery_power_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "battery_power_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "battery_power_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "battery_power_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "battery_power_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "battery_power_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -179,16 +179,16 @@
           "strategy_1_solar_sensor_entity": "Výber senzora slnečného žiarenia",
           "strategy_1_solar_sensor_unit": "Jednotka senzora",
           "strategy_1_maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
-          "strategy_1_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia [%]"
+          "strategy_1_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia (%)"
         }
       },
       "strategy_1_settings_part_2": {
         "title": "STRATÉGIA 1 – časť 2",
         "data": {
-          "strategy_1_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu [%]",
-          "strategy_1_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu [%]",
-          "strategy_1_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu [%]",
-          "strategy_1_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu [%]",
+          "strategy_1_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu (%)",
+          "strategy_1_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu (%)",
+          "strategy_1_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu (%)",
+          "strategy_1_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu (%)",
           "strategy_1_power_grid_ramp_up_fast_threshold": "Prah zmeny výkonu siete pre rýchle zvyšovanie [W]",
           "strategy_1_power_grid_ramp_down_fast_threshold": "Prah zmeny výkonu siete pre rýchle znižovanie [W]",
           "strategy_1_battery_ramp_up_fast_threshold": "Prah zmeny výkonu batérie pre rýchle zvyšovanie [W]",
@@ -217,7 +217,7 @@
           "strategy_2_solar_sensor_entity": "Výber senzora slnečného žiarenia",
           "strategy_2_solar_sensor_unit": "Jednotka senzora",
           "strategy_2_maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
-          "strategy_2_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia [%]"
+          "strategy_2_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia (%)"
         }
       },
       "strategy_2_settings_part_2": {
@@ -227,10 +227,10 @@
           "strategy_2_power_grid_ramp_up_fast_threshold": "Prah zmeny výkonu siete pre rýchle zvyšovanie [W]",
           "strategy_2_power_grid_ramp_down_fast_threshold": "Prah zmeny výkonu siete pre rýchle znižovanie [W]",
           "strategy_2_solar_sensor_ramp_down_fast_threshold": "Prah poklesu hodnoty slnečného senzora pre rýchle znižovanie [W]",
-          "strategy_2_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu [%]",
-          "strategy_2_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu [%]",
-          "strategy_2_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu [%]",
-          "strategy_2_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu [%]"
+          "strategy_2_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu (%)",
+          "strategy_2_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu (%)",
+          "strategy_2_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu (%)",
+          "strategy_2_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu (%)"
         }
       }
     },
@@ -318,9 +318,9 @@
         "title": "Nastavenie krivky výstupného výkonu",
         "description": "Nastavenie parametrov krivky výstupného výkonu",
         "data": {
-          "zero_power_point": "Bod nulového výkonu [%]",
-          "maximum_power_point": "Bod maximálneho výkonu [%]",
-          "gamma": "Gamma [%]"
+          "zero_power_point": "Bod nulového výkonu (%)",
+          "maximum_power_point": "Bod maximálneho výkonu (%)",
+          "gamma": "Gamma (%)"
         }
       },
       "solar_sensor_details": {
@@ -329,10 +329,10 @@
           "solar_sensor_entity": "Výber senzoru intenzity slnečného žiarenia",
           "solar_sensor_unit": "Merná jednotka senzora",
           "maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
-          "solar_sensor_attenuation": "Útlm výkonu senzorom intenzity slnečného žiarenia [%]",
-          "solar_sensor_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "solar_sensor_attenuation": "Útlm výkonu senzorom intenzity slnečného žiarenia (%)",
+          "solar_sensor_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "solar_sensor_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "solar_sensor_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "solar_sensor_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "solar_sensor_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -342,10 +342,10 @@
           "pv_power_entity": "Výber senzoru aktuálneho výkonu fotovoltaiky",
           "pv_power_unit": "Merná jednotka senzora",
           "pv_power_max_power": "Maximálny výkon fotovoltaiky",
-          "pv_power_ratio": "Pomer FV výkonu k výstupnému výkonu [%]",
-          "pv_power_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "pv_power_ratio": "Pomer FV výkonu k výstupnému výkonu (%)",
+          "pv_power_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "pv_power_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "pv_power_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "pv_power_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "pv_power_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -357,9 +357,9 @@
           "power_grid_dead_zone_w": "Šírka mŕtvej zóny [W]",
           "power_grid_offset_w": "Offset [W]",
           "power_grid_offset_export_limit_w": "Offset pre Export limit [W]",
-          "power_grid_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "power_grid_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "power_grid_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "power_grid_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "power_grid_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "power_grid_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -370,9 +370,9 @@
           "battery_power_unit": "Merná jednotka senzora",
           "battery_power_dead_zone_w": "Šírka mŕtvej zóny [W]",
           "battery_power_offset_w": "Offset [W]",
-          "battery_power_ramp_up_power_step": "Krok zvyšovania výkonu [%]",
+          "battery_power_ramp_up_power_step": "Krok zvyšovania výkonu (%)",
           "battery_power_ramp_up_power_cycle": "Cyklus zvyšovania výkonu [s]",
-          "battery_power_ramp_down_power_step": "Krok znižovania výkonu [%]",
+          "battery_power_ramp_down_power_step": "Krok znižovania výkonu (%)",
           "battery_power_ramp_down_power_cycle": "Cyklus znižovania výkonu [s]"
         }
       },
@@ -420,16 +420,16 @@
           "strategy_1_solar_sensor_entity": "Výber senzora slnečného žiarenia",
           "strategy_1_solar_sensor_unit": "Jednotka senzora",
           "strategy_1_maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
-          "strategy_1_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia [%]"
+          "strategy_1_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia (%)"
         }
       },
       "strategy_1_settings_part_2": {
         "title": "STRATÉGIA 1 – časť 2",
         "data": {
-          "strategy_1_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu [%]",
-          "strategy_1_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu [%]",
-          "strategy_1_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu [%]",
-          "strategy_1_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu [%]",
+          "strategy_1_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu (%)",
+          "strategy_1_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu (%)",
+          "strategy_1_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu (%)",
+          "strategy_1_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu (%)",
           "strategy_1_power_grid_ramp_up_fast_threshold": "Prah zmeny výkonu siete pre rýchle zvyšovanie [W]",
           "strategy_1_power_grid_ramp_down_fast_threshold": "Prah zmeny výkonu siete pre rýchle znižovanie [W]",
           "strategy_1_battery_ramp_up_fast_threshold": "Prah zmeny výkonu batérie pre rýchle zvyšovanie [W]",
@@ -458,7 +458,7 @@
           "strategy_2_solar_sensor_entity": "Výber senzora slnečného žiarenia",
           "strategy_2_solar_sensor_unit": "Jednotka senzora",
           "strategy_2_maximum_solar_radiation_value": "Maximálna hodnota slnečného žiarenia",
-          "strategy_2_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia [%]"
+          "strategy_2_solar_sensor_attenuation": "Útlm výkonu sensorom slnečného žiarenia (%)"
         }
       },
       "strategy_2_settings_part_2": {
@@ -468,10 +468,10 @@
           "strategy_2_power_grid_ramp_up_fast_threshold": "Prah zmeny výkonu siete pre rýchle zvyšovanie [W]",
           "strategy_2_power_grid_ramp_down_fast_threshold": "Prah zmeny výkonu siete pre rýchle znižovanie [W]",
           "strategy_2_solar_sensor_ramp_down_fast_threshold": "Prah poklesu hodnoty slnečného senzora pre rýchle znižovanie [W]",
-          "strategy_2_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu [%]",
-          "strategy_2_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu [%]",
-          "strategy_2_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu [%]",
-          "strategy_2_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu [%]"
+          "strategy_2_ramp_up_fast_power_step": "Rýchly krok zvyšovania výkonu (%)",
+          "strategy_2_ramp_up_slow_power_step": "Pomalý krok zvyšovania výkonu (%)",
+          "strategy_2_ramp_down_fast_power_step": "Rýchly krok znižovania výkonu (%)",
+          "strategy_2_ramp_down_slow_power_step": "Pomalý krok znižovania výkonu (%)"
         }
       }
     },
@@ -592,7 +592,7 @@
         "name": "Chybový kód"
       },
       "output_power_percent": {
-        "name": "Výstupný výkon [%]"
+        "name": "Výstupný výkon (%)"
       },
       "output_power_kw": {
         "name": "Výstupný výkon [kW]"
