@@ -547,9 +547,9 @@
     },
     "dac_output_type": {
       "options": {
-        "0-10V": "0–10 V",
-        "0-20mA": "0–20 mA",
-        "4-20mA": "4–20 mA"
+        "0_10V": "0...10 V",
+        "0_20mA": "0...20 mA",
+        "4_20mA": "4...20 mA"
       }
     },
     "device_type": {
@@ -561,8 +561,8 @@
     },
     "dac_type": {
       "options": {
-        "amvol08": "AMVOL08 (8 x 0-10V)",
-        "daci4_i420": "DACI4_I4-20 (4 x 4-20mA)"
+        "amvol08": "AMVOL08 (8 x 0...10V)",
+        "daci4_i420": "DACI4_I4-20 (4 x 4...20mA)"
       }
     },
     "sensor_unit": {
